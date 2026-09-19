@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Yotpo Order API</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0d0d12;
+      --surface: #16161f;
+      --surface2:#1c1c28;
+      --border:  #2a2a3a;
+      --accent:  #6c63ff;
+      --accent2: #a78bfa;
+      --green:   #22c55e;
+      --amber:   #f59e0b;
+      --red:     #ef4444;
+      --blue:    #3b82f6;
+      --text:    #e2e2f0;
+      --muted:   #6b7280;
+      --label:   #a0a0b8;
+      --r:       12px;
+      --font:    'Inter', system-ui, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Nav ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 40px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,13,18,0.9);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      white-space: nowrap;
+    }
+
+    /* ── Page-level tabs ── */
+    .page-tabs {
+      display: flex;
+      gap: 6px;
+      background: rgba(255,255,255,0.05);
+      padding: 5px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .page-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: background .2s, color .2s;
+      white-space: nowrap;
+    }
+
+    .page-tab .badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .page-tab[data-page="create"] .badge { background: rgba(108,99,255,.25); color: var(--accent2); }
+    .page-tab[data-page="retrieve"] .badge { background: rgba(34,197,94,.2); color: var(--green); }
+    .page-tab[data-page="update"] .badge { background: rgba(245,158,11,.2); color: var(--amber); }
+
+    .page-tab.active { background: var(--surface); color: var(--text); }
+    .page-tab.active[data-page="create"]   { box-shadow: 0 0 0 1px rgba(108,99,255,.4); }
+    .page-tab.active[data-page="retrieve"] { box-shadow: 0 0 0 1px rgba(34,197,94,.3); }
+    .page-tab.active[data-page="update"]   { box-shadow: 0 0 0 1px rgba(245,158,11,.3); }
+
+    /* ── Pages ── */
+    .page { display: none; flex-direction: column; flex: 1; }
+    .page.active { display: flex; }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 52px 20px 36px;
+    }
+
+    .hero-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 18px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .chip-purple { background: rgba(108,99,255,.12); border: 1px solid rgba(108,99,255,.25); color: var(--accent2); }
+    .chip-green  { background: rgba(34,197,94,.1);   border: 1px solid rgba(34,197,94,.25);  color: var(--green); }
+    .chip-amber  { background: rgba(245,158,11,.1);  border: 1px solid rgba(245,158,11,.25); color: var(--amber); }
+
+    .hero h1 {
+      font-size: clamp(26px, 4vw, 44px);
+      font-weight: 700;
+      letter-spacing: -1.2px;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+
+    .hero h1 .grad-purple { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero h1 .grad-green  { background: linear-gradient(90deg, #16a34a, var(--green));         -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero h1 .grad-amber  { background: linear-gradient(90deg, #d97706, var(--amber));          -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    .hero p { color: var(--muted); font-size: 15px; max-width: 480px; margin: 0 auto; line-height: 1.6; }
+
+    /* ── Main grid ── */
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1140px;
+      margin: 0 auto 60px;
+      padding: 0 24px;
+      width: 100%;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-box {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .ib-purple { background: rgba(108,99,255,.2); }
+    .ib-blue   { background: rgba(59,130,246,.2); }
+    .ib-green  { background: rgba(34,197,94,.2); }
+    .ib-amber  { background: rgba(245,158,11,.2); }
+
+    .card-header h2 { font-size: 14px; font-weight: 600; }
+    .card-header p  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+    .card-body { padding: 22px; flex: 1; overflow-y: auto; }
+    .card-body::-webkit-scrollbar { width: 4px; }
+    .card-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* ── Form shared ── */
+    .section-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::after { content:''; flex:1; height:1px; background: var(--border); }
+
+    .field-group { margin-bottom: 18px; }
+    .field-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .field       { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+
+    label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--label);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .req { color: var(--accent); font-size: 9px; font-weight: 700; }
+    .opt { background: rgba(107,114,128,.15); color: var(--muted); font-size: 9px; padding: 1px 5px; border-radius: 3px; }
+
+    input, select, textarea {
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      color: var(--text);
+      font-size: 13px;
+      padding: 9px 12px;
+      width: 100%;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+      font-family: var(--font);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(108,99,255,.12);
+    }
+
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+    select option { background: #1e1e2e; }
+
+    /* ── Line items ── */
+    .li-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+
+    .li-row {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: grid;
+      grid-template-columns: 1fr 70px 30px;
+      gap: 8px;
+      align-items: center;
+    }
+    .li-row input { margin: 0; }
+
+    .rm-btn {
+      background: rgba(239,68,68,.08);
+      border: 1px solid rgba(239,68,68,.2);
+      color: var(--red);
+      border-radius: 7px;
+      width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+      transition: background .2s;
+    }
+    .rm-btn:hover { background: rgba(239,68,68,.18); }
+
+    .add-li-btn {
+      width: 100%;
+      background: rgba(108,99,255,.07);
+      border: 1px dashed rgba(108,99,255,.3);
+      color: var(--accent2);
+      padding: 9px;
+      border-radius: 9px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: var(--font);
+      font-weight: 500;
+      transition: background .2s, border-color .2s;
+    }
+    .add-li-btn:hover { background: rgba(108,99,255,.13); border-color: rgba(108,99,255,.5); }
+
+    /* ── Buttons ── */
+    .submit-btn {
+      width: 100%;
+      padding: 13px;
+      border-radius: var(--r);
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+      letter-spacing: 0.3px;
+      transition: opacity .2s, transform .1s, box-shadow .2s;
+      margin-top: 8px;
+      color: #fff;
+    }
+    .submit-btn:hover   { opacity: .9; }
+    .submit-btn:active  { transform: scale(.98); }
+    .submit-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+    .btn-purple { background: linear-gradient(135deg, var(--accent), #8b5cf6); box-shadow: 0 4px 18px rgba(108,99,255,.35); }
+    .btn-green  { background: linear-gradient(135deg, #16a34a, var(--green));   box-shadow: 0 4px 18px rgba(34,197,94,.3); }
+    .btn-amber  { background: linear-gradient(135deg, #d97706, var(--amber));   box-shadow: 0 4px 18px rgba(245,158,11,.3); }
+
+    /* ── Output panel ── */
+    .output-panel { display: flex; flex-direction: column; gap: 14px; }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 500;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      transition: all .3s;
+    }
+    .status-bar.success { background: rgba(34,197,94,.09);  border-color: rgba(34,197,94,.3);  color: var(--green); }
+    .status-bar.error   { background: rgba(239,68,68,.09);  border-color: rgba(239,68,68,.3);  color: var(--red); }
+    .status-bar.loading { background: rgba(108,99,255,.09); border-color: rgba(108,99,255,.3); color: var(--accent2); }
+
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+    .status-bar.loading .status-dot { animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* ── Code tabs ── */
+    .out-tabs { display: flex; gap: 3px; padding: 3px; background: rgba(255,255,255,.04); border-radius: 9px; margin-bottom: 12px; }
+    .out-tab {
+      flex: 1; padding: 7px; border: none; border-radius: 7px;
+      background: transparent; color: var(--muted);
+      font-size: 12px; cursor: pointer; font-family: var(--font);
+      transition: background .2s, color .2s;
+    }
+    .out-tab.active { background: var(--surface2); color: var(--text); }
+
+    .out-panel { display: none; }
+    .out-panel.active { display: block; }
+
+    /* ── Code block ── */
+    .code-block {
+      background: #0a0a10;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      overflow: hidden;
+    }
+
+    .code-block-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .copy-btn {
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border);
+      color: var(--label);
+      border-radius: 5px;
+      padding: 2px 9px;
+      font-size: 10px;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: background .2s;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,.1); color: #fff; }
+    .copy-btn.copied { color: var(--green); border-color: rgba(34,197,94,.3); }
+
+    pre {
+      padding: 14px;
+      font-size: 12px;
+      line-height: 1.7;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #c9d1d9;
+      font-family: 'JetBrains Mono','Fira Code','Cascadia Code',monospace;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    pre::-webkit-scrollbar { width: 3px; height: 3px; }
+    pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* JSON colors */
+    .jk { color: #79c0ff; }
+    .js { color: #a5d6ff; }
+    .jn { color: #f2cc60; }
+    .jb { color: #ff7b72; }
+
+    /* ── Endpoint pill ── */
+    .ep-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 9px 12px;
+      font-size: 11px;
+      flex-wrap: wrap;
+    }
+
+    .method-badge {
+      color: #fff;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+    .mb-post   { background: #6c63ff; }
+    .mb-get    { background: #22c55e; }
+    .mb-patch  { background: #f59e0b; }
+
+    .ep-url { color: var(--muted); font-family: monospace; word-break: break-all; font-size: 11px; }
+
+    /* ── Retrieve results cards ── */
+    .results-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .order-card {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .order-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .order-id { font-size: 13px; font-weight: 600; color: var(--text); }
+    .order-status {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .s-paid      { background: rgba(34,197,94,.15);  color: var(--green); }
+    .s-pending   { background: rgba(245,158,11,.15); color: var(--amber); }
+    .s-cancelled { background: rgba(239,68,68,.15);  color: var(--red); }
+    .s-default   { background: rgba(255,255,255,.1); color: var(--muted); }
+
+    .order-meta { font-size: 11px; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .pg-btn {
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--border);
+      color: var(--label);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: background .2s;
+    }
+    .pg-btn:hover:not(:disabled) { background: rgba(255,255,255,.1); color: #fff; }
+    .pg-btn:disabled { opacity: .35; cursor: not-allowed; }
+    .pg-info { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+    /* ── Filter row (retrieve) ── */
+    .filter-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* ── Shared auth strip ── */
+    .auth-strip {
+      background: rgba(108,99,255,.06);
+      border: 1px solid rgba(108,99,255,.18);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .auth-strip .field { margin-bottom: 0; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--muted);
+      font-size: 11px;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+    footer a { color: var(--accent2); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 800px) {
+      .main { grid-template-columns: 1fr; }
+      nav   { padding: 14px 18px; }
+      .hero { padding: 36px 18px 28px; }
+      .page-tabs { flex-wrap: wrap; }
+      .auth-strip { grid-template-columns: 1fr; }
+      .filter-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav>
+  <div class="logo">⚡ Yotpo Order API</div>
+  <div class="page-tabs" id="pageTabs">
+    <button class="page-tab active" data-page="create"   onclick="showPage('create',   this)"><span class="badge">POST</span> Create Order</button>
+    <button class="page-tab"        data-page="retrieve" onclick="showPage('retrieve', this)"><span class="badge">GET</span>  Retrieve Orders</button>
+    <button class="page-tab"        data-page="update"   onclick="showPage('update',   this)"><span class="badge">PATCH</span> Update Order</button>
+  </div>
+</nav>
+
+
+<!-- ══════════════════════════════════════════
+     PAGE 1 — CREATE ORDER
+══════════════════════════════════════════ -->
+<div class="page active" id="page-create">
+  <div class="hero">
+    <div class="hero-chip chip-purple">🚀 POST Request</div>
+    <h1>Create an Order<br/><span class="grad-purple">the simple way</span></h1>
+    <p>Fill in the form and hit Send — we handle the JSON, headers, and API call for you.</p>
+  </div>
+
+  <div class="main">
+    <!-- Form -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-box ib-purple">📝</div>
+        <div><h2>Order Details</h2><p>All required fields marked with a dot</p></div>
+      </div>
+      <div class="card-body">
+        <form id="createForm">
+
+          <!-- Auth -->
+          <div class="auth-strip">
+            <div class="field">
+              <label>Store ID <span class="req">required</span></label>
+              <input id="c_store_id"    type="text"     placeholder="your_store_app_key" required/>
+            </div>
+            <div class="field">
+              <label>Yotpo Token <span class="req">required</span></label>
+              <input id="c_token"       type="password" placeholder="X-Yotpo-Token"      required/>
+            </div>
+          </div>
+
+          <div class="section-title">Order Info</div>
+          <div class="field-group">
+            <div class="field-row">
+              <div class="field">
+                <label>External Order ID <span class="req">required</span></label>
+                <input id="c_ext_id"    type="text" placeholder="ORDER-001" required/>
+              </div>
+              <div class="field">
+                <label>Order Date <span class="req">required</span></label>
+                <input id="c_date"      type="datetime-local" required/>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Order Name <span class="opt">optional</span></label>
+                <input id="c_name"      type="text" placeholder="#1001"/>
+              </div>
+              <div class="field">
+                <label>Currency <span class="opt">optional</span></label>
+                <select id="c_currency">
+                  <option value="">— Select —</option>
+                  <option>USD</option><option>EUR</option><option>GBP</option>
+                  <option>AUD</option><option>CAD</option><option>JPY</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Total Price <span class="opt">optional</span></label>
+                <input id="c_price"     type="number" placeholder="99.99" step="0.01"/>
+              </div>
+              <div class="field">
+                <label>Payment Method <span class="opt">optional</span></label>
+                <input id="c_pay"       type="text" placeholder="credit_card"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title">Customer</div>
+          <div class="field-group">
+            <div class="field">
+              <label>Customer External ID <span class="req">required</span></label>
+              <input id="c_cust_id"     type="text"  placeholder="cust_abc123" required/>
+            </div>
+            <div class="field">
+              <label>Email <span class="req">required</span></label>
+              <input id="c_email"       type="email" placeholder="customer@example.com" required/>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>First Name <span class="req">required</span></label>
+                <input id="c_first"     type="text" placeholder="Jane" required/>
+              </div>
+              <div class="field">
+                <label>Last Name <span class="req">required</span></label>
+                <input id="c_last"      type="text" placeholder="Doe"  required/>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title">Line Items</div>
+          <div class="li-list" id="c_liList">
+            <div class="li-row">
+              <input type="text"   placeholder="Product ID" class="li-pid"/>
+              <input type="number" placeholder="Qty" class="li-qty" min="1" value="1"/>
+              <button type="button" class="rm-btn" onclick="removeLI(this)">✕</button>
+            </div>
+          </div>
+          <button type="button" class="add-li-btn" onclick="addLI('c_liList')">+ Add Line Item</button>
+
+          <br/><br/>
+          <button type="submit" class="submit-btn btn-purple" id="createBtn">🚀 &nbsp;Send — Create Order</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-box ib-blue">📡</div>
+        <div><h2>Request &amp; Response</h2><p>Live output from the Yotpo API</p></div>
+      </div>
+      <div class="card-body output-panel">
+        <div class="ep-pill">
+          <span class="method-badge mb-post">POST</span>
+          <span class="ep-url">api.yotpo.com/core/v3/stores/<strong id="c_pill_store">:store_id</strong>/orders</span>
+        </div>
+        <div class="status-bar" id="c_status">
+          <span class="status-dot"></span><span id="c_statusTxt">Waiting for request…</span>
+        </div>
+        <div class="out-tabs">
+          <button class="out-tab active" onclick="switchOut('c','req',this)">Request</button>
+          <button class="out-tab"        onclick="switchOut('c','res',this)">Response</button>
+          <button class="out-tab"        onclick="switchOut('c','curl',this)">cURL</button>
+        </div>
+        <div class="out-panel active" id="c_out_req">
+          <div class="code-block">
+            <div class="code-block-hdr">JSON Payload <button class="copy-btn" onclick="cp('c_reqPre',this)">Copy</button></div>
+            <pre id="c_reqPre"><span style="color:var(--muted)">// Fill the form to preview</span></pre>
+          </div>
+        </div>
+        <div class="out-panel" id="c_out_res">
+          <div class="code-block">
+            <div class="code-block-hdr">API Response <button class="copy-btn" onclick="cp('c_resPre',this)">Copy</button></div>
+            <pre id="c_resPre"><span style="color:var(--muted)">// Response appears after sending</span></pre>
+          </div>
+        </div>
+        <div class="out-panel" id="c_out_curl">
+          <div class="code-block">
+            <div class="code-block-hdr">cURL Command <button class="copy-btn" onclick="cp('c_curlPre',this)">Copy</button></div>
+            <pre id="c_curlPre"><span style="color:var(--muted)">// Fill the form to generate</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     PAGE 2 — RETRIEVE ORDERS
+══════════════════════════════════════════ -->
+<div class="page" id="page-retrieve">
+  <div class="hero">
+    <div class="hero-chip chip-green">🔍 GET Request</div>
+    <h1>Retrieve Orders<br/><span class="grad-green">search &amp; filter</span></h1>
+    <p>Fetch orders by ID, date range, or pagination — results displayed as cards.</p>
+  </div>
+
+  <div class="main">
+    <!-- Form -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-box ib-green">🔎</div>
+        <div><h2>Query Parameters</h2><p>All filters are optional except Auth</p></div>
+      </div>
+      <div class="card-body">
+        <form id="retrieveForm">
+
+          <div class="auth-strip">
+            <div class="field">
+              <label>Store ID <span class="req">required</span></label>
+              <input id="r_store_id" type="text"     placeholder="your_store_app_key" required/>
+            </div>
+            <div class="field">
+              <label>Yotpo Token <span class="req">required</span></label>
+              <input id="r_token"    type="password" placeholder="X-Yotpo-Token"      required/>
+            </div>
+          </div>
+
+          <div class="section-title">Filter by ID</div>
+          <div class="field-group">
+            <div class="field">
+              <label>External Order IDs <span class="opt">optional</span></label>
+              <input id="r_ext_ids" type="text" placeholder="ORDER-001, ORDER-002 (comma-separated, max 100)"/>
+            </div>
+          </div>
+
+          <div class="section-title">Filter by Date</div>
+          <div class="field-group">
+            <div class="filter-row">
+              <div class="field">
+                <label>Order Date Min <span class="opt">optional</span></label>
+                <input id="r_date_min" type="datetime-local"/>
+              </div>
+              <div class="field">
+                <label>Order Date Max <span class="opt">optional</span></label>
+                <input id="r_date_max" type="datetime-local"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title">Pagination</div>
+          <div class="field-group">
+            <div class="filter-row">
+              <div class="field">
+                <label>Limit <span class="opt">optional</span></label>
+                <input id="r_limit" type="number" placeholder="25" min="1" max="100" value="25"/>
+              </div>
+              <div class="field">
+                <label>Page Info <span class="opt">cursor</span></label>
+                <input id="r_page_info" type="text" placeholder="Paste next_page_info cursor"/>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn btn-green" id="retrieveBtn">🔍 &nbsp;Fetch Orders</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-box ib-blue">📋</div>
+        <div><h2>Results</h2><p>Orders returned from Yotpo</p></div>
+      </div>
+      <div class="card-body output-panel">
+        <div class="ep-pill">
+          <span class="method-badge mb-get">GET</span>
+          <span class="ep-url">api.yotpo.com/core/v3/stores/<strong id="r_pill_store">:store_id</strong>/orders</span>
+        </div>
+        <div class="status-bar" id="r_status">
+          <span class="status-dot"></span><span id="r_statusTxt">Waiting for request…</span>
+        </div>
+        <div class="out-tabs">
+          <button class="out-tab active" onclick="switchOut('r','cards',this)">Orders</button>
+          <button class="out-tab"        onclick="switchOut('r','raw',this)">Raw JSON</button>
+          <button class="out-tab"        onclick="switchOut('r','curl',this)">cURL</button>
+        </div>
+
+        <!-- Orders cards tab -->
+        <div class="out-panel active" id="r_out_cards">
+          <div id="r_orderCards" style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center;">
+            Orders will appear here after fetching.
+          </div>
+          <div class="pagination" id="r_pagination" style="display:none">
+            <button class="pg-btn" id="r_prevBtn" onclick="rPrevPage()" disabled>← Prev</button>
+            <button class="pg-btn" id="r_nextBtn" onclick="rNextPage()">Next →</button>
+            <span class="pg-info" id="r_pgInfo"></span>
+          </div>
+        </div>
+
+        <!-- Raw JSON tab -->
+        <div class="out-panel" id="r_out_raw">
+          <div class="code-block">
+            <div class="code-block-hdr">Raw Response <button class="copy-btn" onclick="cp('r_rawPre',this)">Copy</button></div>
+            <pre id="r_rawPre"><span style="color:var(--muted)">// Raw JSON appears after fetching</span></pre>
+          </div>
+        </div>
+
+        <!-- cURL tab -->
+        <div class="out-panel" id="r_out_curl">
+          <div class="code-block">
+            <div class="code-block-hdr">cURL Command <button class="copy-btn" onclick="cp('r_curlPre',this)">Copy</button></div>
+            <pre id="r_curlPre"><span style="color:var(--muted)">// Fill the form to generate</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     PAGE 3 — UPDATE ORDER
+══════════════════════════════════════════ -->
+<div class="page" id="page-update">
+  <div class="hero">
+    <div class="hero-chip chip-amber">✏️ PATCH Request</div>
+    <h1>Update an Order<br/><span class="grad-amber">edit what you need</span></h1>
+    <p>Only fill what you want to change — all fields are optional except the Yotpo Order ID.</p>
+  </div>
+
+  <div class="main">
+    <!-- Form -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-box ib-amber">✏️</div>
+        <div><h2>Update Fields</h2><p>Only changed fields will be sent</p></div>
+      </div>
+      <div class="card-body">
+        <form id="updateForm">
+
+          <div class="auth-strip">
+            <div class="field">
+              <label>Store ID <span class="req">required</span></label>
+              <input id="u_store_id"    type="text"     placeholder="your_store_app_key" required/>
+            </div>
+            <div class="field">
+              <label>Yotpo Token <span class="req">required</span></label>
+              <input id="u_token"       type="password" placeholder="X-Yotpo-Token"      required/>
+            </div>
+          </div>
+
+          <div class="section-title">Target Order</div>
+          <div class="field-group">
+            <div class="field">
+              <label>Yotpo Order ID <span class="req">required</span></label>
+              <input id="u_yotpo_id"   type="text" placeholder="Yotpo-generated order ID e.g. 1234" required/>
+            </div>
+          </div>
+
+          <div class="section-title">Order Info <span style="font-size:10px;color:var(--muted);font-weight:400;margin-left:4px;">(leave blank to skip)</span></div>
+          <div class="field-group">
+            <div class="field-row">
+              <div class="field">
+                <label>Order Name <span class="opt">optional</span></label>
+                <input id="u_name"      type="text" placeholder="#S53"/>
+              </div>
+              <div class="field">
+                <label>Order Date <span class="opt">optional</span></label>
+                <input id="u_date"      type="datetime-local"/>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Currency <span class="opt">optional</span></label>
+                <select id="u_currency">
+                  <option value="">— No change —</option>
+                  <option>USD</option><option>EUR</option><option>GBP</option>
+                  <option>AUD</option><option>CAD</option><option>JPY</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Payment Method <span class="opt">optional</span></label>
+                <input id="u_pay"       type="text" placeholder="visa"/>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Total Price <span class="opt">optional</span></label>
+                <input id="u_price"     type="number" placeholder="99.99" step="0.01"/>
+              </div>
+              <div class="field">
+                <label>Payment Status <span class="opt">optional</span></label>
+                <select id="u_pay_status">
+                  <option value="">— No change —</option>
+                  <option value="paid">paid</option>
+                  <option value="pending">pending</option>
+                  <option value="voided">voided</option>
+                  <option value="refunded">refunded</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title">Customer <span style="font-size:10px;color:var(--muted);font-weight:400;margin-left:4px;">(leave blank to skip)</span></div>
+          <div class="field-group">
+            <div class="field">
+              <label>Customer External ID <span class="opt">optional</span></label>
+              <input id="u_cust_id"    type="text"  placeholder="cust_abc123"/>
+            </div>
+            <div class="field">
+              <label>Email <span class="opt">optional</span></label>
+              <input id="u_email"      type="email" placeholder="new@example.com"/>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>First Name <span class="opt">optional</span></label>
+                <input id="u_first"    type="text" placeholder="Jane"/>
+              </div>
+              <div class="field">
+                <label>Last Name <span class="opt">optional</span></label>
+                <input id="u_last"     type="text" placeholder="Doe"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title">Cancellation <span style="font-size:10px;color:var(--muted);font-weight:400;margin-left:4px;">(optional)</span></div>
+          <div class="field-group">
+            <div class="field">
+              <label>Cancellation Date <span class="opt">optional</span></label>
+              <input id="u_cancel_date" type="datetime-local"/>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn btn-amber" id="updateBtn">✏️ &nbsp;Send — Update Order</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon-box ib-blue">📡</div>
+        <div><h2>Request &amp; Response</h2><p>Live output from the Yotpo API</p></div>
+      </div>
+      <div class="card-body output-panel">
+        <div class="ep-pill">
+          <span class="method-badge mb-patch">PATCH</span>
+          <span class="ep-url">api.yotpo.com/core/v3/stores/<strong id="u_pill_store">:store_id</strong>/orders/<strong id="u_pill_oid">:yotpo_order_id</strong></span>
+        </div>
+        <div class="status-bar" id="u_status">
+          <span class="status-dot"></span><span id="u_statusTxt">Waiting for request…</span>
+        </div>
+        <div class="out-tabs">
+          <button class="out-tab active" onclick="switchOut('u','req',this)">Request</button>
+          <button class="out-tab"        onclick="switchOut('u','res',this)">Response</button>
+          <button class="out-tab"        onclick="switchOut('u','curl',this)">cURL</button>
+        </div>
+        <div class="out-panel active" id="u_out_req">
+          <div class="code-block">
+            <div class="code-block-hdr">JSON Payload (changed fields only) <button class="copy-btn" onclick="cp('u_reqPre',this)">Copy</button></div>
+            <pre id="u_reqPre"><span style="color:var(--muted)">// Fill fields you want to change</span></pre>
+          </div>
+        </div>
+        <div class="out-panel" id="u_out_res">
+          <div class="code-block">
+            <div class="code-block-hdr">API Response <button class="copy-btn" onclick="cp('u_resPre',this)">Copy</button></div>
+            <pre id="u_resPre"><span style="color:var(--muted)">// Response appears after sending</span></pre>
+          </div>
+        </div>
+        <div class="out-panel" id="u_out_curl">
+          <div class="code-block">
+            <div class="code-block-hdr">cURL Command <button class="copy-btn" onclick="cp('u_curlPre',this)">Copy</button></div>
+            <pre id="u_curlPre"><span style="color:var(--muted)">// Fill the form to generate</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  Built for simplicity &nbsp;·&nbsp;
+  <a href="https://core-api.yotpo.com/reference/create-order"   target="_blank">Create Docs ↗</a> &nbsp;·&nbsp;
+  <a href="https://core-api.yotpo.com/reference/retrieve-orders" target="_blank">Retrieve Docs ↗</a> &nbsp;·&nbsp;
+  <a href="https://core-api.yotpo.com/reference/update-order"   target="_blank">Update Docs ↗</a>
+</footer>
+
+
+<script>
+/* ══════════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════════ */
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+function switchOut(prefix, panel, btn) {
+  const scope = btn.closest('.out-tabs').parentElement;
+  scope.querySelectorAll('.out-tab').forEach(t => t.classList.remove('active'));
+  scope.querySelectorAll('.out-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(prefix + '_out_' + panel).classList.add('active');
+}
+
+function setStatus(prefix, type, msg) {
+  const bar  = document.getElementById(prefix + '_status');
+  const txt  = document.getElementById(prefix + '_statusTxt');
+  bar.className = 'status-bar ' + type;
+  txt.textContent = msg;
+}
+
+function cp(preId, btn) {
+  navigator.clipboard.writeText(document.getElementById(preId).innerText).then(() => {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+function syntaxHL(json) {
+  return json
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(\.\d+)?([eE][+-]?\d+)?)/g, m => {
+      let c = 'jn';
+      if (/^"/.test(m))        c = /:$/.test(m) ? 'jk' : 'js';
+      else if (/true|false/.test(m)) c = 'jb';
+      else if (/null/.test(m)) c = 'jb';
+      return `<span class="${c}">${m}</span>`;
+    });
+}
+
+function isoDate(val) {
+  if (!val) return null;
+  return new Date(val).toISOString();
+}
+
+function val(id) { return document.getElementById(id).value.trim(); }
+
+/* ══════════════════════════════════════════
+   LINE ITEMS
+══════════════════════════════════════════ */
+let liCount = 1;
+
+function addLI(listId) {
+  const list = document.getElementById(listId);
+  const div  = document.createElement('div');
+  div.className = 'li-row';
+  div.innerHTML = `
+    <input type="text"   placeholder="Product ID" class="li-pid"/>
+    <input type="number" placeholder="Qty" class="li-qty" min="1" value="1"/>
+    <button type="button" class="rm-btn" onclick="removeLI(this)">✕</button>`;
+  list.appendChild(div);
+  updateCreatePreview();
+}
+
+function removeLI(btn) {
+  const list = btn.closest('.li-list');
+  if (list.querySelectorAll('.li-row').length === 1) return;
+  btn.closest('.li-row').remove();
+  updateCreatePreview();
+}
+
+/* ══════════════════════════════════════════
+   PAGE 1 — CREATE
+══════════════════════════════════════════ */
+function buildCreatePayload() {
+  const lineItems = [];
+  document.querySelectorAll('#c_liList .li-row').forEach(row => {
+    const pid = row.querySelector('.li-pid').value.trim();
+    const qty = parseInt(row.querySelector('.li-qty').value) || 1;
+    const li  = { quantity: qty };
+    if (pid) li.external_product_id = pid;
+    lineItems.push(li);
+  });
+
+  const order = {
+    external_id: val('c_ext_id') || 'ORDER-001',
+    order_date:  isoDate(val('c_date')) || new Date().toISOString(),
+    customer: {
+      external_id: val('c_cust_id') || 'cust_001',
+      email:       val('c_email')   || 'user@example.com',
+      first_name:  val('c_first')   || 'Jane',
+      last_name:   val('c_last')    || 'Doe',
+    },
+    line_items: lineItems.length ? lineItems : [{ quantity: 1 }]
+  };
+
+  const n = val('c_name'), cur = val('c_currency'),
+        p = val('c_price'), pay = val('c_pay');
+  if (n)   order.order_name     = n;
+  if (cur) order.currency       = cur;
+  if (p)   order.total_price    = parseFloat(p);
+  if (pay) order.payment_method = pay;
+
+  return { order };
+}
+
+function updateCreatePreview() {
+  const storeId = val('c_store_id') || ':store_id';
+  const token   = val('c_token')    || 'YOUR_TOKEN';
+  const payload = buildCreatePayload();
+
+  document.getElementById('c_pill_store').textContent = storeId;
+  document.getElementById('c_reqPre').innerHTML = syntaxHL(JSON.stringify(payload, null, 2));
+
+  const url = `https://api.yotpo.com/core/v3/stores/${storeId}/orders`;
+  document.getElementById('c_curlPre').textContent =
+`curl -X POST "${url}" \\
+  -H "Content-Type: application/json" \\
+  -H "X-Yotpo-Token: ${token}" \\
+  -d '${JSON.stringify(payload)}'`;
+}
+
+document.getElementById('createForm').addEventListener('input', updateCreatePreview);
+
+document.getElementById('createForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const storeId = val('c_store_id'), token = val('c_token');
+  if (!storeId || !token) { setStatus('c','error','✖ Store ID and Token are required.'); return; }
+
+  const btn = document.getElementById('createBtn');
+  btn.disabled = true; btn.textContent = '⏳ Sending…';
+  setStatus('c','loading','⏳ Sending to Yotpo…');
+
+  // auto-switch to response tab
+  const tabs = document.querySelector('#page-create .out-tabs');
+  tabs.querySelectorAll('.out-tab').forEach(t => t.classList.remove('active'));
+  tabs.querySelectorAll('+ * .out-panel, ~ .out-panel').forEach(p => p.classList.remove('active'));
+  tabs.children[1].classList.add('active');
+  document.getElementById('c_out_res').classList.add('active');
+  document.getElementById('c_out_req').classList.remove('active');
+
+  const payload = buildCreatePayload();
+  try {
+    const res  = await fetch(`https://api.yotpo.com/core/v3/stores/${storeId}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Yotpo-Token': token },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    document.getElementById('c_resPre').innerHTML = syntaxHL(JSON.stringify(data, null, 2));
+    res.ok
+      ? setStatus('c','success',`✔ ${res.status} — Order created! Yotpo ID: ${data?.order?.yotpo_id ?? '—'}`)
+      : setStatus('c','error',  `✖ ${res.status} ${res.statusText} — See response.`);
+  } catch(err) {
+    document.getElementById('c_resPre').textContent = `Error: ${err.message}\n\nTip: CORS blocks browser requests. Use the cURL tab to run from terminal.`;
+    setStatus('c','error','✖ Network error — use cURL instead.');
+  }
+  btn.disabled = false; btn.textContent = '🚀  Send — Create Order';
+});
+
+
+/* ══════════════════════════════════════════
+   PAGE 2 — RETRIEVE
+══════════════════════════════════════════ */
+let rPageStack = [null]; // stack of page_info cursors; [0] = first page
+let rCurrentIdx = 0;
+
+function buildRetrieveURL(pageInfo) {
+  const storeId = val('r_store_id') || ':store_id';
+  const base    = `https://api.yotpo.com/core/v3/stores/${storeId}/orders`;
+  const params  = new URLSearchParams();
+
+  const extIds = val('r_ext_ids');
+  if (extIds) {
+    params.set('external_ids', extIds);
+  } else {
+    const limit   = val('r_limit');
+    const dateMin = val('r_date_min');
+    const dateMax = val('r_date_max');
+    if (limit)   params.set('limit', limit);
+    if (pageInfo) params.set('page_info', pageInfo);
+    if (dateMin) params.set('order_date_min', isoDate(dateMin));
+    if (dateMax) params.set('order_date_max', isoDate(dateMax));
+  }
+
+  return params.toString() ? `${base}?${params}` : base;
+}
+
+function updateRetrievePreview() {
+  const storeId = val('r_store_id') || ':store_id';
+  const token   = val('r_token')    || 'YOUR_TOKEN';
+  const url     = buildRetrieveURL(null);
+  document.getElementById('r_pill_store').textContent = storeId;
+  document.getElementById('r_curlPre').textContent =
+`curl -X GET "${url}" \\
+  -H "X-Yotpo-Token: ${token}"`;
+}
+
+document.getElementById('retrieveForm').addEventListener('input', updateRetrievePreview);
+
+async function fetchOrders(pageInfo) {
+  const storeId = val('r_store_id'), token = val('r_token');
+  if (!storeId || !token) { setStatus('r','error','✖ Store ID and Token are required.'); return; }
+
+  const btn = document.getElementById('retrieveBtn');
+  btn.disabled = true; btn.textContent = '⏳ Fetching…';
+  setStatus('r','loading','⏳ Fetching orders from Yotpo…');
+
+  const url = buildRetrieveURL(pageInfo);
+  try {
+    const res  = await fetch(url, { headers: { 'X-Yotpo-Token': token } });
+    const data = await res.json();
+
+    document.getElementById('r_rawPre').innerHTML = syntaxHL(JSON.stringify(data, null, 2));
+
+    if (res.ok) {
+      const orders = data.orders || [];
+      renderOrderCards(orders);
+      const nextCursor = data.pagination?.next_page_info || data.next_page_info || null;
+
+      // manage page stack
+      if (pageInfo === null) { rPageStack = [null]; rCurrentIdx = 0; }
+      if (nextCursor && rPageStack[rCurrentIdx + 1] !== nextCursor) {
+        rPageStack = rPageStack.slice(0, rCurrentIdx + 1);
+        rPageStack.push(nextCursor);
+      }
+
+      const hasPrev = rCurrentIdx > 0;
+      const hasNext = !!nextCursor;
+      document.getElementById('r_pagination').style.display = (hasPrev || hasNext) ? 'flex' : 'none';
+      document.getElementById('r_prevBtn').disabled = !hasPrev;
+      document.getElementById('r_nextBtn').disabled = !hasNext;
+      document.getElementById('r_pgInfo').textContent = `Page ${rCurrentIdx + 1} · ${orders.length} orders`;
+      setStatus('r','success',`✔ ${res.status} — ${orders.length} order(s) returned.`);
+    } else {
+      document.getElementById('r_orderCards').innerHTML = `<span style="color:var(--red)">Error — see Raw JSON tab for details.</span>`;
+      setStatus('r','error',`✖ ${res.status} ${res.statusText}`);
+    }
+  } catch(err) {
+    document.getElementById('r_orderCards').textContent = `Error: ${err.message}\n\nTip: CORS may block this in browser. Use the cURL tab instead.`;
+    setStatus('r','error','✖ Network error — use cURL instead.');
+  }
+  btn.disabled = false; btn.textContent = '🔍  Fetch Orders';
+}
+
+function renderOrderCards(orders) {
+  const container = document.getElementById('r_orderCards');
+  if (!orders.length) {
+    container.innerHTML = `<div style="color:var(--muted);text-align:center;padding:30px 0;">No orders found for the given filters.</div>`;
+    return;
+  }
+  container.innerHTML = `<div class="results-list">` +
+    orders.map(o => {
+      const status   = (o.payment_status || '').toLowerCase();
+      const sCls     = status==='paid' ? 's-paid' : status==='pending' ? 's-pending' : status==='cancelled' ? 's-cancelled' : 's-default';
+      const date     = o.order_date ? new Date(o.order_date).toLocaleDateString() : '—';
+      const price    = o.total_price ? `${o.currency || ''} ${o.total_price}`.trim() : '—';
+      const customer = o.customer ? `${o.customer.first_name || ''} ${o.customer.last_name || ''} · ${o.customer.email || ''}`.trim() : '—';
+      return `
+        <div class="order-card">
+          <div class="order-card-top">
+            <span class="order-id">${o.order_name || o.external_id || o.yotpo_id || '—'}</span>
+            ${status ? `<span class="order-status ${sCls}">${status}</span>` : ''}
+          </div>
+          <div class="order-meta">
+            <span>📅 ${date}</span>
+            <span>💰 ${price}</span>
+            <span>👤 ${customer}</span>
+            ${o.yotpo_id ? `<span>ID: ${o.yotpo_id}</span>` : ''}
+          </div>
+        </div>`;
+    }).join('') + `</div>`;
+}
+
+function rNextPage() {
+  rCurrentIdx++;
+  fetchOrders(rPageStack[rCurrentIdx]);
+}
+
+function rPrevPage() {
+  rCurrentIdx--;
+  fetchOrders(rPageStack[rCurrentIdx]);
+}
+
+document.getElementById('retrieveForm').addEventListener('submit', e => {
+  e.preventDefault();
+  rCurrentIdx = 0;
+  rPageStack  = [null];
+  fetchOrders(null);
+});
+
+
+/* ══════════════════════════════════════════
+   PAGE 3 — UPDATE
+══════════════════════════════════════════ */
+function buildUpdatePayload() {
+  const order = {};
+
+  const n      = val('u_name');
+  const date   = val('u_date');
+  const cur    = val('u_currency');
+  const pay    = val('u_pay');
+  const price  = val('u_price');
+  const pstat  = val('u_pay_status');
+  const cancel = val('u_cancel_date');
+
+  if (n)      order.order_name      = n;
+  if (date)   order.order_date      = isoDate(date);
+  if (cur)    order.currency        = cur;
+  if (pay)    order.payment_method  = pay;
+  if (price)  order.total_price     = parseFloat(price);
+  if (pstat)  order.payment_status  = pstat;
+
+  // customer
+  const custId = val('u_cust_id'), email = val('u_email'),
+        first  = val('u_first'),   last  = val('u_last');
+  if (custId || email || first || last) {
+    order.customer = {};
+    if (custId) order.customer.external_id = custId;
+    if (email)  order.customer.email       = email;
+    if (first)  order.customer.first_name  = first;
+    if (last)   order.customer.last_name   = last;
+  }
+
+  // cancellation
+  if (cancel) order.cancellation = { cancellation_date: isoDate(cancel) };
+
+  return { order };
+}
+
+function updateUpdatePreview() {
+  const storeId = val('u_store_id') || ':store_id';
+  const yotpoId = val('u_yotpo_id') || ':yotpo_order_id';
+  const token   = val('u_token')    || 'YOUR_TOKEN';
+  const payload = buildUpdatePayload();
+
+  document.getElementById('u_pill_store').textContent = storeId;
+  document.getElementById('u_pill_oid').textContent   = yotpoId;
+  document.getElementById('u_reqPre').innerHTML = syntaxHL(JSON.stringify(payload, null, 2));
+
+  const url = `https://api.yotpo.com/core/v3/stores/${storeId}/orders/${yotpoId}`;
+  document.getElementById('u_curlPre').textContent =
+`curl -X PATCH "${url}" \\
+  -H "Content-Type: application/json" \\
+  -H "X-Yotpo-Token: ${token}" \\
+  -d '${JSON.stringify(payload)}'`;
+}
+
+document.getElementById('updateForm').addEventListener('input', updateUpdatePreview);
+
+document.getElementById('updateForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const storeId = val('u_store_id'), token = val('u_token'), yotpoId = val('u_yotpo_id');
+  if (!storeId || !token || !yotpoId) { setStatus('u','error','✖ Store ID, Token, and Yotpo Order ID are required.'); return; }
+
+  const btn = document.getElementById('updateBtn');
+  btn.disabled = true; btn.textContent = '⏳ Sending…';
+  setStatus('u','loading','⏳ Sending update to Yotpo…');
+
+  // auto-switch to response tab
+  const page   = document.getElementById('page-update');
+  page.querySelectorAll('.out-tab').forEach(t => t.classList.remove('active'));
+  page.querySelectorAll('.out-panel').forEach(p => p.classList.remove('active'));
+  page.querySelectorAll('.out-tab')[1].classList.add('active');
+  document.getElementById('u_out_res').classList.add('active');
+
+  const payload = buildUpdatePayload();
+  const url     = `https://api.yotpo.com/core/v3/stores/${storeId}/orders/${yotpoId}`;
+  try {
+    const res  = await fetch(url, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'X-Yotpo-Token': token },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    document.getElementById('u_resPre').innerHTML = syntaxHL(JSON.stringify(data, null, 2));
+    res.ok
+      ? setStatus('u','success',`✔ ${res.status} — Order updated successfully!`)
+      : setStatus('u','error',  `✖ ${res.status} ${res.statusText} — See response.`);
+  } catch(err) {
+    document.getElementById('u_resPre').textContent = `Error: ${err.message}\n\nTip: CORS may block browser requests. Use the cURL tab instead.`;
+    setStatus('u','error','✖ Network error — use cURL instead.');
+  }
+  btn.disabled = false; btn.textContent = '✏️  Send — Update Order';
+});
+
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+// default datetime
+const nowDT = new Date();
+nowDT.setMinutes(nowDT.getMinutes() - nowDT.getTimezoneOffset());
+const dtStr = nowDT.toISOString().slice(0,16);
+document.getElementById('c_date').value = dtStr;
+
+updateCreatePreview();
+updateRetrievePreview();
+updateUpdatePreview();
+</script>
+</body>
+</html>

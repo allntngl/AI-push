@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>iOS Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    }
+
+    .phone {
+      width: 393px;
+      background: #000;
+      border-radius: 54px;
+      padding: 12px;
+      box-shadow:
+        0 0 0 1px #333,
+        0 0 0 3px #1a1a1a,
+        0 40px 80px rgba(0,0,0,0.9),
+        inset 0 0 0 1px #222;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Dynamic island */
+    .dynamic-island {
+      width: 120px;
+      height: 34px;
+      background: #000;
+      border-radius: 20px;
+      margin: 14px auto 0;
+      position: relative;
+      z-index: 10;
+      box-shadow: 0 0 0 1px #222;
+    }
+
+    .screen {
+      background: #000;
+      border-radius: 44px;
+      overflow: hidden;
+      padding: 0;
+      min-height: 780px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    /* ── Display ── */
+    .display {
+      padding: 0 24px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: flex-end;
+      min-height: 220px;
+    }
+
+    .expression {
+      font-size: 22px;
+      color: rgba(255,255,255,0.35);
+      min-height: 30px;
+      text-align: right;
+      margin-bottom: 2px;
+      word-break: break-all;
+    }
+
+    .result {
+      font-size: 88px;
+      font-weight: 200;
+      color: #fff;
+      text-align: right;
+      line-height: 1;
+      word-break: break-all;
+      transition: font-size 0.15s ease;
+      letter-spacing: -3px;
+    }
+
+    .result.medium { font-size: 66px; letter-spacing: -2px; }
+    .result.small  { font-size: 48px; letter-spacing: -1px; }
+    .result.xsmall { font-size: 36px; letter-spacing: 0; }
+
+    /* ── Button grid ── */
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      padding: 12px 14px 24px;
+    }
+
+    button {
+      height: 80px;
+      width: 80px;
+      border: none;
+      border-radius: 50%;
+      font-size: 32px;
+      font-weight: 400;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: filter 0.1s;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button:active { filter: brightness(1.6); }
+
+    /* Number buttons — dark grey */
+    .btn-num {
+      background: #333333;
+      color: #fff;
+      font-size: 34px;
+      font-weight: 400;
+    }
+
+    /* Function buttons (AC, +/-, %) — light grey */
+    .btn-fn {
+      background: #a5a5a5;
+      color: #000;
+      font-size: 32px;
+      font-weight: 500;
+    }
+
+    /* Operator buttons — orange */
+    .btn-op {
+      background: #ff9f0a;
+      color: #fff;
+      font-size: 38px;
+      font-weight: 300;
+    }
+
+    /* Active operator (selected) */
+    .btn-op.active {
+      background: #fff;
+      color: #ff9f0a;
+    }
+
+    /* Zero button spans two columns */
+    .btn-zero {
+      width: 100%;
+      border-radius: 40px;
+      grid-column: span 2;
+      justify-content: flex-start;
+      padding-left: 28px;
+      font-size: 34px;
+    }
+
+    /* Ripple */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      transform: scale(0);
+      animation: ripple-anim 0.4s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes ripple-anim {
+      to { transform: scale(4); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="dynamic-island"></div>
+  <div class="screen">
+
+    <div class="display">
+      <div class="expression" id="expression"></div>
+      <div class="result" id="result">0</div>
+    </div>
+
+    <div class="buttons">
+      <!-- Row 1 -->
+      <button class="btn-fn"  id="btn-ac"  onclick="clearAll(this)">AC</button>
+      <button class="btn-fn"               onclick="toggleSign()">+/−</button>
+      <button class="btn-fn"               onclick="percent()">%</button>
+      <button class="btn-op" data-op="/"   onclick="inputOp('/', this)">÷</button>
+
+      <!-- Row 2 -->
+      <button class="btn-num" onclick="inputNum('7')">7</button>
+      <button class="btn-num" onclick="inputNum('8')">8</button>
+      <button class="btn-num" onclick="inputNum('9')">9</button>
+      <button class="btn-op" data-op="*"   onclick="inputOp('*', this)">×</button>
+
+      <!-- Row 3 -->
+      <button class="btn-num" onclick="inputNum('4')">4</button>
+      <button class="btn-num" onclick="inputNum('5')">5</button>
+      <button class="btn-num" onclick="inputNum('6')">6</button>
+      <button class="btn-op" data-op="-"   onclick="inputOp('-', this)">−</button>
+
+      <!-- Row 4 -->
+      <button class="btn-num" onclick="inputNum('1')">1</button>
+      <button class="btn-num" onclick="inputNum('2')">2</button>
+      <button class="btn-num" onclick="inputNum('3')">3</button>
+      <button class="btn-op" data-op="+"   onclick="inputOp('+', this)">+</button>
+
+      <!-- Row 5 -->
+      <button class="btn-num btn-zero" onclick="inputNum('0')">0</button>
+      <button class="btn-num"          onclick="inputDot()">.</button>
+      <button class="btn-op"           onclick="calculate()">=</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let current     = '0';
+  let previous    = '';
+  let operator    = null;
+  let freshResult = false;
+  let justCalc    = false;
+
+  const resultEl     = document.getElementById('result');
+  const expressionEl = document.getElementById('expression');
+  const acBtn        = document.getElementById('btn-ac');
+
+  /* ── display ── */
+  function fmt(n) {
+    if (isNaN(n) || !isFinite(n)) return 'Error';
+    // up to 9 significant digits, strip trailing zeros
+    let s = parseFloat(n.toPrecision(9)).toString();
+    // add thousands separators to integer part only
+    let [int, dec] = s.split('.');
+    int = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return dec !== undefined ? `${int}.${dec}` : int;
+  }
+
+  function updateDisplay() {
+    const display = fmt(parseFloat(current));
+    resultEl.textContent = display;
+    // scale font based on length
+    const len = display.replace(/[,\s]/g,'').length;
+    resultEl.className = 'result' +
+      (len > 12 ? ' xsmall' : len > 9 ? ' small' : len > 7 ? ' medium' : '');
+    // toggle AC / C
+    acBtn.textContent = (current !== '0' && !freshResult) ? 'C' : 'AC';
+  }
+
+  function clearOpHighlight() {
+    document.querySelectorAll('.btn-op').forEach(b => b.classList.remove('active'));
+  }
+
+  /* ── actions ── */
+  function inputNum(n) {
+    clearOpHighlight();
+    if (freshResult) { current = n; freshResult = false; }
+    else current = (current === '0') ? n : current + n;
+    justCalc = false;
+    updateDisplay();
+  }
+
+  function inputDot() {
+    clearOpHighlight();
+    if (freshResult) { current = '0.'; freshResult = false; updateDisplay(); return; }
+    if (!current.includes('.')) current += '.';
+    updateDisplay();
+  }
+
+  function inputOp(op, btn) {
+    // chain operations
+    if (operator && previous !== '' && !freshResult) {
+      calculate(true);
+    }
+    previous    = current;
+    operator    = op;
+    freshResult = true;
+    justCalc    = false;
+
+    clearOpHighlight();
+    if (btn) btn.classList.add('active');
+
+    const sym = { '+':'+', '-':'−', '*':'×', '/':'÷' }[op];
+    expressionEl.textContent = `${fmt(parseFloat(previous))} ${sym}`;
+    updateDisplay();
+  }
+
+  function calculate(chaining = false) {
+    if (!operator || previous === '') return;
+    const a = parseFloat(previous);
+    const b = parseFloat(current);
+    let res;
+    switch (operator) {
+      case '+': res = a + b; break;
+      case '-': res = a - b; break;
+      case '*': res = a * b; break;
+      case '/': res = b === 0 ? NaN : a / b; break;
+    }
+
+    if (!chaining) {
+      const sym = { '+':'+', '-':'−', '*':'×', '/':'÷' }[operator];
+      expressionEl.textContent = `${fmt(a)} ${sym} ${fmt(b)}`;
+      clearOpHighlight();
+      operator    = null;
+      previous    = '';
+      freshResult = true;
+      justCalc    = true;
+    }
+    current = isNaN(res) || !isFinite(res) ? 'NaN' : res.toString();
+    updateDisplay();
+  }
+
+  function clearAll() {
+    if (current !== '0' && !freshResult) {
+      // first press = C (clear current)
+      current = '0';
+    } else {
+      // second press = AC (clear all)
+      current = '0'; previous = ''; operator = null; freshResult = false;
+      expressionEl.textContent = '';
+      clearOpHighlight();
+    }
+    updateDisplay();
+  }
+
+  function toggleSign() {
+    current = (parseFloat(current) * -1).toString();
+    updateDisplay();
+  }
+
+  function percent() {
+    if (operator && previous !== '') {
+      // iOS behaviour: x% of previous  e.g. 200 + 10% → 200 + 20
+      current = (parseFloat(previous) * parseFloat(current) / 100).toString();
+    } else {
+      current = (parseFloat(current) / 100).toString();
+    }
+    updateDisplay();
+  }
+
+  /* ── keyboard ── */
+  document.addEventListener('keydown', e => {
+    if (e.key >= '0' && e.key <= '9') inputNum(e.key);
+    else if (e.key === '.')      inputDot();
+    else if (e.key === '+')      inputOp('+', null);
+    else if (e.key === '-')      inputOp('-', null);
+    else if (e.key === '*')      inputOp('*', null);
+    else if (e.key === '/') { e.preventDefault(); inputOp('/', null); }
+    else if (e.key === 'Enter' || e.key === '=') calculate();
+    else if (e.key === 'Backspace') {
+      if (!freshResult) { current = current.slice(0,-1) || '0'; updateDisplay(); }
+    }
+    else if (e.key === 'Escape') clearAll();
+    else if (e.key === '%')      percent();
+  });
+
+  /* ── ripple ── */
+  document.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const r = document.createElement('span');
+      r.classList.add('ripple');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      r.style.width  = r.style.height = size + 'px';
+      r.style.left   = (e.clientX - rect.left  - size/2) + 'px';
+      r.style.top    = (e.clientY - rect.top   - size/2) + 'px';
+      this.appendChild(r);
+      setTimeout(() => r.remove(), 400);
+    });
+  });
+</script>
+</body>
+</html>
