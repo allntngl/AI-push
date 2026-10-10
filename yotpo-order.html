@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Yotpo Order API</title>
+  <title>Allen-AI Order API</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -289,6 +289,24 @@
     }
     .add-li-btn:hover { background: rgba(108,99,255,.13); border-color: rgba(108,99,255,.5); }
 
+    /* ── Product row (v1.0 create-order) ── */
+    .prod-row {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: grid;
+      grid-template-columns: 1.1fr 1.5fr 1.3fr 1fr 1.2fr 0.8fr 30px;
+      gap: 8px;
+      align-items: center;
+    }
+    .prod-row input { margin: 0; }
+
+    @media (max-width: 720px) {
+      .prod-row { grid-template-columns: 1fr 1fr; }
+      .prod-row input { grid-column: 1 / -1; }
+    }
+
     /* ── Buttons ── */
     .submit-btn {
       width: 100%;
@@ -532,7 +550,7 @@
 
 <!-- ══ NAV ══ -->
 <nav>
-  <div class="logo">⚡ Yotpo Order API</div>
+  <div class="logo">⚡ ALLNXXII Order API</div>
   <div class="page-tabs" id="pageTabs">
     <button class="page-tab active" data-page="create"   onclick="showPage('create',   this)"><span class="badge">POST</span> Create Order</button>
     <button class="page-tab"        data-page="retrieve" onclick="showPage('retrieve', this)"><span class="badge">GET</span>  Retrieve Orders</button>
@@ -547,8 +565,8 @@
 <div class="page active" id="page-create">
   <div class="hero">
     <div class="hero-chip chip-purple">🚀 POST Request</div>
-    <h1>Create an Order<br/><span class="grad-purple">the simple way</span></h1>
-    <p>Fill in the form and hit Send — we handle the JSON, headers, and API call for you.</p>
+    <h1>Create an Order<br/><span class="grad-purple">via Yotpo Purchases</span></h1>
+    <p>v1.0 endpoint — <code>api.yotpo.com/apps/{app_key}/purchases/</code>. Auth is body-based (utoken + app_key).</p>
   </div>
 
   <div class="main">
@@ -561,37 +579,42 @@
       <div class="card-body">
         <form id="createForm">
 
-          <!-- Auth -->
+          <!-- Auth (body-based for v1.0) -->
           <div class="auth-strip">
             <div class="field">
-              <label>Store ID <span class="req">required</span></label>
+              <label>App Key (Store ID) <span class="req">required</span></label>
               <input id="c_store_id"    type="text"     placeholder="your_store_app_key" required/>
             </div>
             <div class="field">
-              <label>Yotpo Token <span class="req">required</span></label>
-              <input id="c_token"       type="password" placeholder="X-Yotpo-Token"      required/>
+              <label>U-Token <span class="req">required</span></label>
+              <input id="c_token"       type="password" placeholder="your U-Token"      required/>
             </div>
           </div>
 
-          <div class="section-title">Order Info</div>
+          <div class="section-title">Order</div>
           <div class="field-group">
             <div class="field-row">
               <div class="field">
-                <label>External Order ID <span class="req">required</span></label>
-                <input id="c_ext_id"    type="text" placeholder="ORDER-001" required/>
+                <label>Order ID <span class="req">required</span></label>
+                <input id="c_order_id"   type="text" placeholder="ORDER-001" required/>
               </div>
               <div class="field">
-                <label>Order Date <span class="req">required</span></label>
-                <input id="c_date"      type="datetime-local" required/>
+                <label>Order Date <span class="opt">optional</span></label>
+                <input id="c_date"       type="date"/>
               </div>
             </div>
             <div class="field-row">
               <div class="field">
-                <label>Order Name <span class="opt">optional</span></label>
-                <input id="c_name"      type="text" placeholder="#1001"/>
+                <label>Platform <span class="req">required</span></label>
+                <select id="c_platform" required>
+                  <option value="">— Select —</option>
+                  <option>shopify</option>
+                  <option>woocommerce</option>
+                  <option>general</option>
+                </select>
               </div>
               <div class="field">
-                <label>Currency <span class="opt">optional</span></label>
+                <label>Currency ISO <span class="opt">optional</span></label>
                 <select id="c_currency">
                   <option value="">— Select —</option>
                   <option>USD</option><option>EUR</option><option>GBP</option>
@@ -601,12 +624,17 @@
             </div>
             <div class="field-row">
               <div class="field">
-                <label>Total Price <span class="opt">optional</span></label>
-                <input id="c_price"     type="number" placeholder="99.99" step="0.01"/>
+                <label>Delivery Type <span class="opt">optional</span></label>
+                <select id="c_delivery">
+                  <option value="">— Select —</option>
+                  <option>same_day</option>
+                  <option>express</option>
+                  <option>standard</option>
+                </select>
               </div>
               <div class="field">
-                <label>Payment Method <span class="opt">optional</span></label>
-                <input id="c_pay"       type="text" placeholder="credit_card"/>
+                <label>User Reference <span class="opt">optional</span></label>
+                <input id="c_user_ref"    type="text" placeholder="Points &amp; Rewards ref"/>
               </div>
             </div>
           </div>
@@ -614,8 +642,8 @@
           <div class="section-title">Customer</div>
           <div class="field-group">
             <div class="field">
-              <label>Customer External ID <span class="req">required</span></label>
-              <input id="c_cust_id"     type="text"  placeholder="cust_abc123" required/>
+              <label>Customer Name <span class="req">required</span></label>
+              <input id="c_cust_name"   type="text" placeholder="Jane Doe" required/>
             </div>
             <div class="field">
               <label>Email <span class="req">required</span></label>
@@ -623,25 +651,39 @@
             </div>
             <div class="field-row">
               <div class="field">
-                <label>First Name <span class="req">required</span></label>
-                <input id="c_first"     type="text" placeholder="Jane" required/>
+                <label>Phone <span class="opt">optional</span></label>
+                <input id="c_phone"      type="tel" placeholder="+1 555 123 4567"/>
               </div>
               <div class="field">
-                <label>Last Name <span class="req">required</span></label>
-                <input id="c_last"      type="text" placeholder="Doe"  required/>
+                <label>Address <span class="opt">optional</span></label>
+                <input id="c_address"    type="text" placeholder="123 Main St"/>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>City <span class="opt">optional</span></label>
+                <input id="c_city"       type="text" placeholder="San Francisco"/>
+              </div>
+              <div class="field">
+                <label>State / Country <span class="opt">optional</span></label>
+                <input id="c_state"      type="text" placeholder="CA, US"/>
               </div>
             </div>
           </div>
 
-          <div class="section-title">Line Items</div>
-          <div class="li-list" id="c_liList">
-            <div class="li-row">
-              <input type="text"   placeholder="Product ID" class="li-pid"/>
-              <input type="number" placeholder="Qty" class="li-qty" min="1" value="1"/>
-              <button type="button" class="rm-btn" onclick="removeLI(this)">✕</button>
+          <div class="section-title">Products</div>
+          <div class="li-list" id="c_prodList">
+            <div class="prod-row">
+              <input type="text"   placeholder="Product ID" class="pr-id"/>
+              <input type="text"   placeholder="Product URL" class="pr-url"/>
+              <input type="text"   placeholder="Product Name" class="pr-name"/>
+              <input type="text"   placeholder="Image URL" class="pr-img"/>
+              <input type="number" placeholder="Price" class="pr-price" step="0.01"/>
+              <input type="text"   placeholder="UPC" class="pr-upc"/>
+              <button type="button" class="rm-btn" onclick="removePR(this)">✕</button>
             </div>
           </div>
-          <button type="button" class="add-li-btn" onclick="addLI('c_liList')">+ Add Line Item</button>
+          <button type="button" class="add-li-btn" onclick="addPR('c_prodList')">+ Add Product</button>
 
           <br/><br/>
           <button type="submit" class="submit-btn btn-purple" id="createBtn">🚀 &nbsp;Send — Create Order</button>
@@ -658,7 +700,7 @@
       <div class="card-body output-panel">
         <div class="ep-pill">
           <span class="method-badge mb-post">POST</span>
-          <span class="ep-url">api.yotpo.com/core/v3/stores/<strong id="c_pill_store">:store_id</strong>/orders</span>
+          <span class="ep-url">api.yotpo.com/apps/<strong id="c_pill_store">:app_key</strong>/purchases/</span>
         </div>
         <div class="status-bar" id="c_status">
           <span class="status-dot"></span><span id="c_statusTxt">Waiting for request…</span>
@@ -1041,77 +1083,103 @@ function isoDate(val) {
 function val(id) { return document.getElementById(id).value.trim(); }
 
 /* ══════════════════════════════════════════
-   LINE ITEMS
+   PRODUCTS (v1.0 create-order)
 ══════════════════════════════════════════ */
-let liCount = 1;
-
-function addLI(listId) {
+function addPR(listId) {
   const list = document.getElementById(listId);
   const div  = document.createElement('div');
-  div.className = 'li-row';
+  div.className = 'prod-row';
   div.innerHTML = `
-    <input type="text"   placeholder="Product ID" class="li-pid"/>
-    <input type="number" placeholder="Qty" class="li-qty" min="1" value="1"/>
-    <button type="button" class="rm-btn" onclick="removeLI(this)">✕</button>`;
+    <input type="text"   placeholder="Product ID" class="pr-id"/>
+    <input type="text"   placeholder="Product URL" class="pr-url"/>
+    <input type="text"   placeholder="Product Name" class="pr-name"/>
+    <input type="text"   placeholder="Image URL" class="pr-img"/>
+    <input type="number" placeholder="Price" class="pr-price" step="0.01"/>
+    <input type="text"   placeholder="UPC" class="pr-upc"/>
+    <button type="button" class="rm-btn" onclick="removePR(this)">✕</button>`;
   list.appendChild(div);
   updateCreatePreview();
 }
 
-function removeLI(btn) {
+function removePR(btn) {
   const list = btn.closest('.li-list');
-  if (list.querySelectorAll('.li-row').length === 1) return;
-  btn.closest('.li-row').remove();
+  if (list.querySelectorAll('.prod-row').length === 1) return;
+  btn.closest('.prod-row').remove();
   updateCreatePreview();
 }
 
 /* ══════════════════════════════════════════
-   PAGE 1 — CREATE
+   PAGE 1 — CREATE (v1.0 purchases)
 ══════════════════════════════════════════ */
 function buildCreatePayload() {
-  const lineItems = [];
-  document.querySelectorAll('#c_liList .li-row').forEach(row => {
-    const pid = row.querySelector('.li-pid').value.trim();
-    const qty = parseInt(row.querySelector('.li-qty').value) || 1;
-    const li  = { quantity: qty };
-    if (pid) li.external_product_id = pid;
-    lineItems.push(li);
+  const appKey = val('c_store_id');
+  const token  = val('c_token');
+
+  // Products: object keyed by product ID
+  const products = {};
+  document.querySelectorAll('#c_prodList .prod-row').forEach(row => {
+    const pid = row.querySelector('.pr-id').value.trim();
+    if (!pid) return;
+    const prod = {
+      url:  row.querySelector('.pr-url').value.trim(),
+      name: row.querySelector('.pr-name').value.trim(),
+    };
+    const img = row.querySelector('.pr-img').value.trim();
+    if (img) prod.image = img;
+    const price = row.querySelector('.pr-price').value.trim();
+    if (price) prod.price = parseFloat(price);
+    const upc = row.querySelector('.pr-upc').value.trim();
+    if (upc) prod.specs = { upc };
+    products[pid] = prod;
   });
 
-  const order = {
-    external_id: val('c_ext_id') || 'ORDER-001',
-    order_date:  isoDate(val('c_date')) || new Date().toISOString(),
-    customer: {
-      external_id: val('c_cust_id') || 'cust_001',
-      email:       val('c_email')   || 'user@example.com',
-      first_name:  val('c_first')   || 'Jane',
-      last_name:   val('c_last')    || 'Doe',
-    },
-    line_items: lineItems.length ? lineItems : [{ quantity: 1 }]
+  const body = {
+    app_key,
+    utoken: token,
+    order_id: val('c_order_id') || 'ORDER-001',
+    platform: val('c_platform') || 'general',
+    email:    val('c_email')   || 'user@example.com',
+    customer_name: val('c_cust_name') || 'Customer',
   };
 
-  const n = val('c_name'), cur = val('c_currency'),
-        p = val('c_price'), pay = val('c_pay');
-  if (n)   order.order_name     = n;
-  if (cur) order.currency       = cur;
-  if (p)   order.total_price    = parseFloat(p);
-  if (pay) order.payment_method = pay;
+  const date = val('c_date');
+  if (date) body.order_date = date;
 
-  return { order };
+  const cur = val('c_currency');
+  if (cur) body.currency_iso = cur;
+
+  const delivery = val('c_delivery');
+  if (delivery) body.delivery_type = delivery;
+
+  const userRef = val('c_user_ref');
+  if (userRef) body.user_reference = userRef;
+
+  const phone = val('c_phone'), addr = val('c_address'), city = val('c_city'), state = val('c_state');
+  if (phone || addr || city || state) {
+    body.customer = {};
+    if (phone) body.customer.phone_number = phone;
+    if (addr)  body.customer.address = addr;
+    if (city)  body.customer.city = city;
+    if (state) body.customer.state = state;
+  }
+
+  if (Object.keys(products).length) body.products = products;
+
+  return body;
 }
 
 function updateCreatePreview() {
-  const storeId = val('c_store_id') || ':store_id';
+  const storeId = val('c_store_id') || ':app_key';
   const token   = val('c_token')    || 'YOUR_TOKEN';
   const payload = buildCreatePayload();
 
   document.getElementById('c_pill_store').textContent = storeId;
   document.getElementById('c_reqPre').innerHTML = syntaxHL(JSON.stringify(payload, null, 2));
 
-  const url = `https://api.yotpo.com/core/v3/stores/${storeId}/orders`;
+  const url = `https://api.yotpo.com/apps/${storeId}/purchases/`;
   document.getElementById('c_curlPre').textContent =
 `curl -X POST "${url}" \\
   -H "Content-Type: application/json" \\
-  -H "X-Yotpo-Token: ${token}" \\
   -d '${JSON.stringify(payload)}'`;
 }
 
@@ -1120,31 +1188,35 @@ document.getElementById('createForm').addEventListener('input', updateCreatePrev
 document.getElementById('createForm').addEventListener('submit', async e => {
   e.preventDefault();
   const storeId = val('c_store_id'), token = val('c_token');
-  if (!storeId || !token) { setStatus('c','error','✖ Store ID and Token are required.'); return; }
+  const orderId = val('c_order_id');
+  if (!storeId || !token) { setStatus('c','error','✖ App Key and U-Token are required.'); return; }
+  if (!orderId) { setStatus('c','error','✖ Order ID is required.'); return; }
 
   const btn = document.getElementById('createBtn');
   btn.disabled = true; btn.textContent = '⏳ Sending…';
-  setStatus('c','loading','⏳ Sending to Yotpo…');
+  setStatus('c','loading','⏳ Sending to Yotpo v1.0 purchases…');
 
   // auto-switch to response tab
   const tabs = document.querySelector('#page-create .out-tabs');
   tabs.querySelectorAll('.out-tab').forEach(t => t.classList.remove('active'));
-  tabs.querySelectorAll('+ * .out-panel, ~ .out-panel').forEach(p => p.classList.remove('active'));
+  tabs.querySelectorAll('.out-panel').forEach(p => p.classList.remove('active'));
   tabs.children[1].classList.add('active');
   document.getElementById('c_out_res').classList.add('active');
   document.getElementById('c_out_req').classList.remove('active');
 
   const payload = buildCreatePayload();
   try {
-    const res  = await fetch(`https://api.yotpo.com/core/v3/stores/${storeId}/orders`, {
+    const res  = await fetch(`https://api.yotpo.com/apps/${storeId}/purchases/`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Yotpo-Token': token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = { message: text, status: res.status }; }
     document.getElementById('c_resPre').innerHTML = syntaxHL(JSON.stringify(data, null, 2));
     res.ok
-      ? setStatus('c','success',`✔ ${res.status} — Order created! Yotpo ID: ${data?.order?.yotpo_id ?? '—'}`)
+      ? setStatus('c','success',`✔ ${res.status} — Order created!`)
       : setStatus('c','error',  `✖ ${res.status} ${res.statusText} — See response.`);
   } catch(err) {
     document.getElementById('c_resPre').textContent = `Error: ${err.message}\n\nTip: CORS blocks browser requests. Use the cURL tab to run from terminal.`;

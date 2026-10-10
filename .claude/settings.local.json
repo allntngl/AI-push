@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:core-api.yotpo.com)"
+      "WebFetch(domain:core-api.yotpo.com)",
+      "PowerShell(Start-Process \"http://localhost:3000/yotpo-dashboard.html\")"
     ]
   }
 }

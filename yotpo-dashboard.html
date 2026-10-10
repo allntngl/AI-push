@@ -1,0 +1,2340 @@
+<title>ALLNXII</title>
+<style>
+/* ── Design tokens ── */
+:root {
+  /* Layout: 3-tab system with shared auth, split forms/output, card-based */
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --text: #18181b;
+  --muted: #71717a;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --code-bg: #f4f4f5;
+  --radius: 12px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #09090b;
+    --surface: #18181b;
+    --border: #27272a;
+    --text: #fafafa;
+    --muted: #a1a1aa;
+    --accent: #818cf8;
+    --accent-hover: #a5b4fc;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --error: #f87171;
+    --code-bg: #27272a;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #09090b;
+  --surface: #18181b;
+  --border: #27272a;
+  --text: #fafafa;
+  --muted: #a1a1aa;
+  --accent: #818cf8;
+  --accent-hover: #a5b4fc;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --error: #f87171;
+  --code-bg: #27272a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  padding-block: 0;
+  padding-inline: 0;
+}
+
+/* ── Header ── */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--bg);
+  padding: 0.25rem;
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid var(--border);
+}
+
+.tab {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: calc(var(--radius) - 4px);
+  font-family: inherit;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tab.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* ── Page container ── */
+.page {
+  display: none;
+  padding: 2rem 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page.active { display: block; }
+
+/* ── Grid layout ── */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 968px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.card-icon {
+  font-size: 1.25rem;
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.card-desc {
+  font-size: 0.813rem;
+  color: var(--muted);
+  margin-top: 0.125rem;
+}
+
+.card-body {
+  padding: 1.25rem;
+  flex: 1;
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+.card-body::-webkit-scrollbar { width: 6px; }
+.card-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Forms ── */
+.auth-banner {
+  background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1));
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: calc(var(--radius) - 2px);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .auth-banner { grid-template-columns: 1fr; }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+.field label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.req { color: var(--accent); font-size: 0.75rem; }
+.opt {
+  background: rgba(0,0,0,0.05);
+  color: var(--muted);
+  font-size: 0.688rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .opt {
+    background: rgba(255,255,255,0.1);
+  }
+}
+
+:root[data-theme="dark"] .opt {
+  background: rgba(255,255,255,0.1);
+}
+
+input, select, textarea {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  color: var(--text);
+  font-size: 0.875rem;
+  padding: 0.625rem 0.875rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+}
+
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.6; }
+
+select option {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .field-row { grid-template-columns: 1fr; }
+}
+
+/* ── Section ── */
+.section-title {
+  font-size: 0.688rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  font-weight: 600;
+  margin: 1.5rem 0 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── Buttons ── */
+.btn {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-secondary {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.btn-secondary:hover { background: var(--surface); }
+
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+
+.btn-export {
+  background: var(--warning);
+  color: white;
+}
+
+/* ── Status bar ── */
+.status {
+  padding: 0.75rem 1rem;
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 0.813rem;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+}
+
+.status.loading .status-dot {
+  background: var(--accent);
+  animation: pulse 1.5s infinite;
+}
+
+.status.success {
+  background: rgba(16,185,129,0.1);
+  border-color: rgba(16,185,129,0.3);
+  color: var(--success);
+}
+
+.status.success .status-dot { background: var(--success); }
+
+.status.error {
+  background: rgba(239,68,68,0.1);
+  border-color: rgba(239,68,68,0.3);
+  color: var(--error);
+}
+
+.status.error .status-dot { background: var(--error); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ── Output tabs ── */
+.output-tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--bg);
+  border-radius: calc(var(--radius) - 4px);
+  margin-bottom: 1rem;
+}
+
+.output-tab {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.813rem;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: calc(var(--radius) - 6px);
+  transition: all 0.2s;
+}
+
+.output-tab.active {
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 500;
+}
+
+.output-panel { display: none; }
+.output-panel.active { display: block; }
+
+/* ── Code block ── */
+.code-block {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  overflow: hidden;
+}
+
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.875rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 600;
+}
+
+.copy-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 0.25rem 0.625rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.copy-btn:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.copy-btn.copied {
+  color: var(--success);
+  border-color: var(--success);
+}
+
+pre {
+  padding: 1rem;
+  font-size: 0.813rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  color: var(--text);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+pre::-webkit-scrollbar { width: 4px; height: 4px; }
+pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* JSON syntax highlighting */
+.jk { color: #0ea5e9; }
+.js { color: #10b981; }
+.jn { color: #f59e0b; }
+.jb { color: #8b5cf6; }
+
+/* ── Results list ── */
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.result-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  padding: 1rem;
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.625rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.result-id {
+  font-size: 0.938rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.badge {
+  font-size: 0.688rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge-success { background: rgba(16,185,129,0.15); color: var(--success); }
+.badge-warning { background: rgba(245,158,11,0.15); color: var(--warning); }
+.badge-error { background: rgba(239,68,68,0.15); color: var(--error); }
+.badge-default { background: rgba(0,0,0,0.05); color: var(--muted); }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .badge-default {
+    background: rgba(255,255,255,0.1);
+  }
+}
+
+:root[data-theme="dark"] .badge-default {
+  background: rgba(255,255,255,0.1);
+}
+
+.result-meta {
+  font-size: 0.813rem;
+  color: var(--muted);
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ── Pagination ── */
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-top: 1rem;
+}
+
+.pg-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.813rem;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: calc(var(--radius) - 4px);
+  transition: all 0.2s;
+}
+
+.pg-btn:hover:not(:disabled) {
+  background: var(--surface);
+  border-color: var(--accent);
+}
+
+.pg-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pg-info {
+  font-size: 0.813rem;
+  color: var(--muted);
+  margin-left: auto;
+}
+
+/* ── Empty state ── */
+.empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--muted);
+  font-size: 0.938rem;
+}
+
+/* ── Hero section ── */
+.hero {
+  text-align: center;
+  padding: 2rem 1rem 1rem;
+}
+
+.hero-title {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-wrap: balance;
+}
+
+.hero-desc {
+  color: var(--muted);
+  font-size: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ── Endpoint pill ── */
+.endpoint {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.813rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.method {
+  font-size: 0.688rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.method-post { background: var(--accent); }
+.method-get { background: var(--success); }
+.method-patch { background: var(--warning); }
+
+.endpoint-url {
+  color: var(--muted);
+  font-family: 'SF Mono', monospace;
+  font-size: 0.75rem;
+  word-break: break-all;
+}
+
+/* ── Action buttons in results ── */
+.btn-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btn-sm {
+  padding: 0.5rem 0.875rem;
+  font-size: 0.75rem;
+}
+
+/* ── Order Queue ── */
+.queue-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  padding: 0.875rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.queue-item-details {
+  flex: 1;
+  font-size: 0.813rem;
+}
+
+.queue-item-id {
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.queue-item-meta {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.queue-item-remove {
+  background: var(--error);
+  color: white;
+  border: none;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+
+.queue-item-remove:hover {
+  opacity: 0.8;
+}
+/* ── Product Table ── */
+.prod-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.prod-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.prod-table th {
+  background: var(--accent);
+  color: #fff;
+  padding: 0.625rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.688rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.prod-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prod-table tr:hover td {
+  background: rgba(99,102,241,0.05);
+}
+
+.prod-table .cell-empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ── Single Product Detail ── */
+.prod-detail {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.prod-detail-header {
+  background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1));
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.prod-detail-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.prod-detail-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+@media (max-width: 640px) {
+  .prod-detail-body { grid-template-columns: 1fr; }
+}
+
+.prod-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.625rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  gap: 1rem;
+}
+
+.prod-detail-row:last-child {
+  border-bottom: none;
+}
+
+.prod-detail-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.prod-detail-value {
+  font-size: 0.813rem;
+  color: var(--text);
+  text-align: right;
+  word-break: break-word;
+  min-width: 0;
+}
+
+.prod-detail-value.empty {
+  color: var(--muted);
+  font-style: italic;
+}
+</style>
+
+<!-- ══════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════ -->
+<div class="header">
+  <div class="logo">
+    <span>⚡</span>
+    <span>ALLNXXII</span>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('auth')">🔑 Auth</button>
+    <button class="tab" onclick="showTab('products')">📦 Products</button>
+    <button class="tab" onclick="showTab('orders')">🛒 Orders</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: AUTHENTICATION
+══════════════════════════════════════════ -->
+<div class="page active" id="page-auth">
+  <div class="hero">
+    <h1 class="hero-title">Get Your Access Token</h1>
+    <p class="hero-desc">Authenticate with your Yotpo credentials to receive a U-Token for API requests</p>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🔐</span>
+        <div>
+          <div class="card-title">Credentials</div>
+          <div class="card-desc">Enter your Yotpo store credentials</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <form id="authForm">
+          <div class="field">
+            <label>Store ID / App Key <span class="req">required</span></label>
+            <input type="text" id="auth_store_id" placeholder="your_store_app_key" required>
+          </div>
+
+          <div class="field">
+            <label>Secret Key <span class="req">required</span></label>
+            <input type="password" id="auth_secret" placeholder="your_secret_key" required>
+          </div>
+
+          <div class="btn-group" style="margin-top:0.5rem">
+            <button type="submit" class="btn btn-primary" id="authBtn" style="flex:1">
+              🚀 Generate U-Token
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="clearAuthForm()" style="flex:0 0 auto; padding:0.75rem 1rem">
+              🗑️ Clear
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📡</span>
+        <div>
+          <div class="card-title">Response</div>
+          <div class="card-desc">Your access token will appear here</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="endpoint">
+          <span class="method method-post">POST</span>
+          <span class="endpoint-url">api.yotpo.com/core/v3/stores/<strong id="auth_pill_store">:store_id</strong>/access_tokens</span>
+        </div>
+
+        <div class="status" id="auth_status">
+          <span class="status-dot"></span>
+          <span>Waiting for request...</span>
+        </div>
+
+        <div class="output-tabs">
+          <button class="output-tab active" onclick="switchOutput('auth', 'token')">Token</button>
+          <button class="output-tab" onclick="switchOutput('auth', 'response')">Raw Response</button>
+          <button class="output-tab" onclick="switchOutput('auth', 'curl')">cURL</button>
+        </div>
+
+        <div class="output-panel active" id="auth_out_token">
+          <div id="auth_token_display" style="display:none; margin-bottom:1rem">
+            <div style="background:var(--bg); border:2px solid var(--success); border-radius:var(--radius); padding:1rem">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem">
+                <div style="font-size:0.875rem; font-weight:600; color:var(--success)">✓ Token Generated Successfully</div>
+                <button class="btn btn-sm btn-success" onclick="copyTokenQuick()" style="padding:0.375rem 0.75rem; font-size:0.75rem">
+                  📋 Copy Token (Ctrl+C)
+                </button>
+              </div>
+              <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:0.875rem; font-family:'SF Mono',monospace; font-size:0.813rem; word-break:break-all; color:var(--text); user-select:all" id="auth_token_value"></div>
+              <div style="margin-top:0.75rem; font-size:0.75rem; color:var(--muted)">
+                💡 Tip: Token has been auto-filled in Products and Orders tabs
+              </div>
+            </div>
+          </div>
+          <div class="code-block">
+            <div class="code-header">
+              Full Response
+              <button class="copy-btn" onclick="copyText('auth_token_pre')">Copy</button>
+            </div>
+            <pre id="auth_token_pre" style="color:var(--muted)">// Token will appear after authentication</pre>
+          </div>
+        </div>
+
+        <div class="output-panel" id="auth_out_response">
+          <div class="code-block">
+            <div class="code-header">
+              API Response
+              <button class="copy-btn" onclick="copyText('auth_response_pre')">Copy</button>
+            </div>
+            <pre id="auth_response_pre" style="color:var(--muted)">// Response will appear after authentication</pre>
+          </div>
+        </div>
+
+        <div class="output-panel" id="auth_out_curl">
+          <div class="code-block">
+            <div class="code-header">
+              cURL Command
+              <button class="copy-btn" onclick="copyText('auth_curl_pre')">Copy</button>
+            </div>
+            <pre id="auth_curl_pre" style="color:var(--muted)">// Fill the form to generate cURL command</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: PRODUCTS
+══════════════════════════════════════════ -->
+<div class="page" id="page-products">
+  <div class="hero">
+    <h1 class="hero-title">Product Management</h1>
+    <p class="hero-desc">Create, retrieve, and update products in your Yotpo store</p>
+  </div>
+
+  <div class="auth-banner">
+    <div class="field" style="margin-bottom:0">
+      <label>Store ID <span class="req">required</span></label>
+      <input type="text" id="prod_store_id" placeholder="your_store_app_key">
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label>U-Token <span class="req">required</span></label>
+      <input type="password" id="prod_token" placeholder="X-Yotpo-Token">
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- CREATE/UPDATE PRODUCT -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">✏️</span>
+        <div>
+          <div class="card-title">Create / Update Product</div>
+          <div class="card-desc">Fill in product details</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <form id="prodForm">
+          <div class="section-title">Basic Info</div>
+          <div class="field">
+            <label>External Product ID / Yotpo Product ID <span class="req">required</span></label>
+            <input type="text" id="prod_ext_id" placeholder="For Create: use External ID, For Update: use Yotpo ID" required>
+            <div style="font-size:0.688rem; color:var(--muted); margin-top:0.25rem">
+              💡 <strong>Create:</strong> Use your External Product ID (e.g., PROD-001). <strong>Update:</strong> Use Yotpo Product ID from retrieve.
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Product Name <span class="req">required</span></label>
+            <input type="text" id="prod_name" placeholder="Product Name" required>
+          </div>
+
+          <div class="field">
+            <label>Description <span class="opt">optional</span></label>
+            <textarea id="prod_desc" rows="3" placeholder="Product description"></textarea>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Price <span class="opt">optional</span></label>
+              <input type="number" id="prod_price" placeholder="99.99" step="0.01">
+            </div>
+            <div class="field">
+              <label>Currency <span class="opt">optional</span></label>
+              <select id="prod_currency">
+                <option value="">Select</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="CAD">CAD</option>
+                <option value="AUD">AUD</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="section-title">Additional Details</div>
+          <div class="field-row">
+            <div class="field">
+              <label>SKU <span class="opt">optional</span></label>
+              <input type="text" id="prod_sku" placeholder="SKU-001">
+            </div>
+            <div class="field">
+              <label>Brand <span class="opt">optional</span></label>
+              <input type="text" id="prod_brand" placeholder="Brand Name">
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Inventory <span class="opt">optional</span></label>
+              <input type="number" id="prod_inventory" placeholder="100">
+            </div>
+            <div class="field">
+              <label>Status <span class="opt">optional</span></label>
+              <select id="prod_status">
+                <option value="">Select</option>
+                <option value="active">Active</option>
+                <option value="draft">Draft</option>
+                <option value="archived">Archived</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Product URL <span class="opt">optional</span></label>
+            <input type="url" id="prod_url" placeholder="https://example.com/product">
+          </div>
+
+          <div class="btn-group" style="margin-top:1.5rem">
+            <button type="submit" class="btn btn-primary" id="prodCreateBtn" style="flex:1">
+              ➕ Create Product
+            </button>
+            <button type="button" class="btn btn-secondary" id="prodUpdateBtn" style="flex:1" onclick="updateProduct()">
+              ✏️ Update Product
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- PRODUCT OUTPUT -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📊</span>
+        <div>
+          <div class="card-title">Output</div>
+          <div class="card-desc">API responses and results</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="status" id="prod_status">
+          <span class="status-dot"></span>
+          <span>Ready</span>
+        </div>
+
+        <div class="output-tabs">
+          <button class="output-tab active" onclick="switchOutput('prod', 'response')">Response</button>
+          <button class="output-tab" onclick="switchOutput('prod', 'curl')">cURL</button>
+        </div>
+
+        <div class="output-panel active" id="prod_out_response">
+          <div class="code-block">
+            <div class="code-header">
+              API Response
+              <button class="copy-btn" onclick="copyText('prod_response_pre')">Copy</button>
+            </div>
+            <pre id="prod_response_pre" style="color:var(--muted)">// Response will appear here</pre>
+          </div>
+        </div>
+
+        <div class="output-panel" id="prod_out_curl">
+          <div class="code-block">
+            <div class="code-header">
+              cURL Command
+              <button class="copy-btn" onclick="copyText('prod_curl_pre')">Copy</button>
+            </div>
+            <pre id="prod_curl_pre" style="color:var(--muted)">// Fill the form to generate</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RETRIEVE PRODUCTS -->
+  <div style="margin-top:1.5rem">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🔍</span>
+        <div>
+          <div class="card-title">Retrieve Products</div>
+          <div class="card-desc">Retrieve a single product or list all products</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <div class="field">
+            <label>External Product ID <span class="opt">leave empty for all</span></label>
+            <input type="text" id="prod_retrieve_id" placeholder="e.g. PROD-001">
+          </div>
+          <div class="field">
+            <label>Yotpo Product ID <span class="opt">retrieve by yotpo id</span></label>
+            <input type="text" id="prod_retrieve_yotpo_id" placeholder="e.g. 123456789">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Limit <span class="opt">optional</span></label>
+            <input type="number" id="prod_limit" placeholder="25" value="25" min="1" max="100">
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <div style="display:flex; gap:0.5rem">
+              <button class="btn btn-success" onclick="retrieveProducts()" style="flex:1">
+                🔍 Retrieve All
+              </button>
+              <button class="btn btn-primary" onclick="retrieveSingleProduct()" style="flex:1">
+                🔎 Retrieve Single
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-group" style="margin-top:0">
+          <button class="btn btn-export" onclick="exportProducts()" style="flex:1">
+            📥 Export to CSV
+          </button>
+        </div>
+
+        <div class="status" id="prod_retrieve_status" style="margin-top:1rem">
+          <span class="status-dot"></span>
+          <span>Ready to fetch</span>
+        </div>
+
+        <!-- Single product detail view -->
+        <div id="prod_single_view" style="display:none; margin-top:1rem"></div>
+
+        <!-- Product table for all products -->
+        <div id="prod_results" style="margin-top:1rem; overflow-x:auto"></div>
+
+        <div class="pagination" id="prod_pagination" style="display:none">
+          <button class="pg-btn" onclick="prodPrevPage()" id="prod_prev_btn" disabled>← Prev</button>
+          <button class="pg-btn" onclick="prodNextPage()" id="prod_next_btn">Next →</button>
+          <span class="pg-info" id="prod_page_info"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: ORDERS
+══════════════════════════════════════════ -->
+<div class="page" id="page-orders">
+  <div class="hero">
+    <h1 class="hero-title">Order Management</h1>
+    <p class="hero-desc">Create, retrieve, update, and export orders</p>
+  </div>
+
+  <div class="auth-banner">
+    <div class="field" style="margin-bottom:0">
+      <label>Store ID <span class="req">required</span></label>
+      <input type="text" id="order_store_id" placeholder="your_store_app_key">
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label>U-Token <span class="req">required</span></label>
+      <input type="password" id="order_token" placeholder="X-Yotpo-Token">
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- CREATE ORDER -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">➕</span>
+        <div>
+          <div class="card-title">Create Order</div>
+          <div class="card-desc">Fill in order details</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <form id="orderForm">
+          <div class="section-title">Order Info</div>
+          <div class="field">
+            <label>External Order ID <span class="req">required</span></label>
+            <input type="text" id="order_ext_id" placeholder="ORDER-001" required>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Order Date <span class="req">required</span></label>
+              <input type="datetime-local" id="order_date" required>
+            </div>
+            <div class="field">
+              <label>Currency <span class="opt">optional</span></label>
+              <select id="order_currency">
+                <option value="">Select</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Total Price <span class="opt">optional</span></label>
+            <input type="number" id="order_price" placeholder="99.99" step="0.01">
+          </div>
+
+          <div class="section-title">Customer</div>
+          <div class="field">
+            <label>Customer ID <span class="req">required</span></label>
+            <input type="text" id="order_cust_id" placeholder="cust_001" required>
+          </div>
+
+          <div class="field">
+            <label>Email <span class="req">required</span></label>
+            <input type="email" id="order_email" placeholder="customer@example.com" required>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>First Name <span class="req">required</span></label>
+              <input type="text" id="order_first" placeholder="Jane" required>
+            </div>
+            <div class="field">
+              <label>Last Name <span class="req">required</span></label>
+              <input type="text" id="order_last" placeholder="Doe" required>
+            </div>
+          </div>
+
+          <div class="btn-group" style="margin-top:1rem">
+            <button type="button" class="btn btn-secondary" onclick="addOrderToQueue()" style="flex:1">
+              ➕ Add to Queue
+            </button>
+            <button type="submit" class="btn btn-primary" id="orderCreateBtn" style="flex:1">
+              🚀 Create Single Order
+            </button>
+          </div>
+        </form>
+
+        <div id="order_queue_section" style="margin-top:1.5rem; display:none">
+          <div class="section-title">Order Queue (<span id="queue_count">0</span>)</div>
+          <div id="order_queue" class="results"></div>
+          <button class="btn btn-success" onclick="submitAllOrders()" style="width:100%; margin-top:0.75rem" id="submitAllBtn">
+            🚀 Create All Orders (<span id="queue_count2">0</span>)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORDER OUTPUT -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📊</span>
+        <div>
+          <div class="card-title">Output</div>
+          <div class="card-desc">API responses</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="status" id="order_status">
+          <span class="status-dot"></span>
+          <span>Ready</span>
+        </div>
+
+        <div class="output-tabs">
+          <button class="output-tab active" onclick="switchOutput('order', 'response')">Response</button>
+          <button class="output-tab" onclick="switchOutput('order', 'curl')">cURL</button>
+        </div>
+
+        <div class="output-panel active" id="order_out_response">
+          <div class="code-block">
+            <div class="code-header">
+              API Response
+              <button class="copy-btn" onclick="copyText('order_response_pre')">Copy</button>
+            </div>
+            <pre id="order_response_pre" style="color:var(--muted)">// Response will appear here</pre>
+          </div>
+        </div>
+
+        <div class="output-panel" id="order_out_curl">
+          <div class="code-block">
+            <div class="code-header">
+              cURL Command
+              <button class="copy-btn" onclick="copyText('order_curl_pre')">Copy</button>
+            </div>
+            <pre id="order_curl_pre" style="color:var(--muted)">// Fill the form to generate</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RETRIEVE ORDERS -->
+  <div style="margin-top:1.5rem">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🔍</span>
+        <div>
+          <div class="card-title">Retrieve Orders</div>
+          <div class="card-desc">Search and list orders</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <div class="field">
+            <label>Order ID (optional) <span class="opt">leave empty for all</span></label>
+            <input type="text" id="order_retrieve_id" placeholder="ORDER-001">
+          </div>
+          <div class="field">
+            <label>Limit <span class="opt">optional</span></label>
+            <input type="number" id="order_limit" placeholder="25" value="25" min="1" max="100">
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-success" onclick="retrieveOrders()" style="flex:1">
+            🔍 Retrieve Orders
+          </button>
+          <button class="btn btn-export" onclick="exportOrders()" style="flex:1">
+            📥 Export to CSV
+          </button>
+        </div>
+
+        <div class="status" id="order_retrieve_status" style="margin-top:1rem">
+          <span class="status-dot"></span>
+          <span>Ready to fetch</span>
+        </div>
+
+        <div id="order_results" class="results" style="margin-top:1rem"></div>
+
+        <div class="pagination" id="order_pagination" style="display:none">
+          <button class="pg-btn" onclick="orderPrevPage()" id="order_prev_btn" disabled>← Prev</button>
+          <button class="pg-btn" onclick="orderNextPage()" id="order_next_btn">Next →</button>
+          <span class="pg-info" id="order_page_info"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   GLOBAL STATE
+══════════════════════════════════════════ */
+let currentToken = '';
+let productsData = [];
+let ordersData = [];
+let prodPageStack = [null];
+let prodCurrentIdx = 0;
+let orderPageStack = [null];
+let orderCurrentIdx = 0;
+let orderQueue = [];
+
+// API Base URL - use proxy server to avoid CORS
+const API_BASE = window.location.hostname === 'localhost'
+  ? 'http://localhost:3000/api/yotpo'
+  : 'https://api.yotpo.com/core/v3';
+
+/* ══════════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════════ */
+function showTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function switchOutput(prefix, panel) {
+  const parent = event.target.closest('.card-body');
+  parent.querySelectorAll('.output-tab').forEach(t => t.classList.remove('active'));
+  parent.querySelectorAll('.output-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById(prefix + '_out_' + panel).classList.add('active');
+}
+
+function setStatus(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = 'status ' + type;
+  el.querySelector('span:last-child').textContent = msg;
+}
+
+function copyText(id) {
+  const text = document.getElementById(id).innerText;
+  const btn = event.target;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    }, 1500);
+  });
+}
+
+function syntaxHighlight(json) {
+  return json
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/("(\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|true|false|null|-?\d+(\.\d+)?([eE][+-]?\d+)?)/g, m => {
+      let c = 'jn';
+      if (/^"/.test(m)) c = /:$/.test(m) ? 'jk' : 'js';
+      else if (/true|false/.test(m)) c = 'jb';
+      else if (/null/.test(m)) c = 'jb';
+      return `<span class="${c}">${m}</span>`;
+    });
+}
+
+function val(id) { return document.getElementById(id).value.trim(); }
+
+function isoDate(val) {
+  if (!val) return null;
+  return new Date(val).toISOString();
+}
+
+function copyTokenQuick() {
+  const token = currentToken || document.getElementById('auth_token_value').textContent;
+  if (!token) return;
+
+  navigator.clipboard.writeText(token).then(() => {
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    btn.style.background = 'var(--success)';
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.background = '';
+    }, 1500);
+  }).catch(() => {
+    // Fallback: select the text
+    const el = document.getElementById('auth_token_value');
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+}
+
+/* ══════════════════════════════════════════
+   AUTHENTICATION
+══════════════════════════════════════════ */
+function clearAuthForm() {
+  document.getElementById('auth_store_id').value = '';
+  document.getElementById('auth_secret').value = '';
+  document.getElementById('auth_token_display').style.display = 'none';
+  document.getElementById('auth_token_value').textContent = '';
+  document.getElementById('auth_token_pre').innerHTML = '<span style="color:var(--muted)">// Token will appear after authentication</span>';
+  document.getElementById('auth_response_pre').innerHTML = '<span style="color:var(--muted)">// Response will appear after authentication</span>';
+  document.getElementById('auth_curl_pre').innerHTML = '<span style="color:var(--muted)">// Fill the form to generate cURL command</span>';
+  setStatus('auth_status', '', 'Ready for new credentials');
+  currentToken = '';
+}
+
+document.getElementById('authForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const storeId = val('auth_store_id');
+  const secret = val('auth_secret');
+
+  if (!storeId || !secret) {
+    setStatus('auth_status', 'error', '✖ Store ID and Secret are required');
+    return;
+  }
+
+  const btn = document.getElementById('authBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Authenticating...';
+  setStatus('auth_status', 'loading', '⏳ Requesting access token...');
+
+  document.getElementById('auth_pill_store').textContent = storeId;
+
+  const payload = { secret };
+  const url = `${API_BASE}/stores/${storeId}/access_tokens`;
+  const curlUrl = `https://api.yotpo.com/core/v3/stores/${storeId}/access_tokens`;
+
+  // Update cURL
+  document.getElementById('auth_curl_pre').textContent =
+`curl -X POST "${curlUrl}" \\
+  -H "Content-Type: application/json" \\
+  -d '${JSON.stringify(payload)}'`;
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    document.getElementById('auth_response_pre').innerHTML = syntaxHighlight(JSON.stringify(data, null, 2));
+
+    if (res.ok && data.access_token) {
+      currentToken = data.access_token;
+      document.getElementById('auth_token_pre').innerHTML = syntaxHighlight(JSON.stringify(data, null, 2));
+
+      // Show the token prominently
+      document.getElementById('auth_token_value').textContent = data.access_token;
+      document.getElementById('auth_token_display').style.display = 'block';
+
+      setStatus('auth_status', 'success', '✔ Token generated successfully!');
+
+      // Auto-fill tokens in other tabs
+      document.getElementById('prod_token').value = data.access_token;
+      document.getElementById('order_token').value = data.access_token;
+      document.getElementById('prod_store_id').value = storeId;
+      document.getElementById('order_store_id').value = storeId;
+    } else {
+      setStatus('auth_status', 'error', `✖ ${res.status} ${res.statusText}`);
+    }
+  } catch (err) {
+    document.getElementById('auth_response_pre').textContent = `Error: ${err.message}\n\nNote: CORS may block browser requests. Use the cURL command instead.`;
+    setStatus('auth_status', 'error', '✖ Network error — use cURL instead');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🚀 Generate U-Token';
+});
+
+/* ══════════════════════════════════════════
+   PRODUCTS - CREATE
+══════════════════════════════════════════ */
+document.getElementById('prodForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const storeId = val('prod_store_id');
+  const token = val('prod_token');
+
+  if (!storeId || !token) {
+    setStatus('prod_status', 'error', '✖ Store ID and Token required');
+    return;
+  }
+
+  const btn = document.getElementById('prodCreateBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Creating...';
+  setStatus('prod_status', 'loading', '⏳ Creating product...');
+
+  const product = {
+    external_id: val('prod_ext_id'),
+    name: val('prod_name')
+  };
+
+  if (val('prod_desc')) product.description = val('prod_desc');
+  if (val('prod_price')) product.price = parseFloat(val('prod_price'));
+  if (val('prod_currency')) product.currency = val('prod_currency');
+  if (val('prod_sku')) product.sku = val('prod_sku');
+  if (val('prod_brand')) product.brand = val('prod_brand');
+  if (val('prod_inventory')) product.inventory_quantity = parseInt(val('prod_inventory'));
+  if (val('prod_status')) product.status = val('prod_status');
+  if (val('prod_url')) product.url = val('prod_url');
+
+  const payload = { product };
+  const url = `${API_BASE}/stores/${storeId}/products`;
+  const curlUrl = `https://api.yotpo.com/core/v3/stores/${storeId}/products`;
+
+  document.getElementById('prod_curl_pre').textContent =
+`curl -X POST "${url}" \\
+  -H "Content-Type: application/json" \\
+  -H "X-Yotpo-Token: ${token}" \\
+  -d '${JSON.stringify(payload)}'`;
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Yotpo-Token': token
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    document.getElementById('prod_response_pre').innerHTML = syntaxHighlight(JSON.stringify(data, null, 2));
+
+    if (res.ok) {
+      setStatus('prod_status', 'success', `✔ Product created! ID: ${data.product?.yotpo_id || '—'}`);
+    } else {
+      setStatus('prod_status', 'error', `✖ ${res.status} ${res.statusText}`);
+    }
+  } catch (err) {
+    document.getElementById('prod_response_pre').textContent = `Error: ${err.message}\n\nNote: CORS may block browser requests. Use the cURL command instead.`;
+    setStatus('prod_status', 'error', '✖ Network error — use cURL instead');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '➕ Create Product';
+});
+
+/* ══════════════════════════════════════════
+   PRODUCTS - UPDATE
+══════════════════════════════════════════ */
+async function updateProduct() {
+  const storeId = val('prod_store_id');
+  const token = val('prod_token');
+  const extId = val('prod_ext_id');
+
+  if (!storeId || !token || !extId) {
+    setStatus('prod_status', 'error', '✖ Store ID, Token, and Yotpo Product ID required');
+    return;
+  }
+
+  const btn = document.getElementById('prodUpdateBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Updating...';
+  setStatus('prod_status', 'loading', '⏳ Updating product...');
+
+  const product = {};
+  if (val('prod_name')) product.name = val('prod_name');
+  if (val('prod_desc')) product.description = val('prod_desc');
+  if (val('prod_price')) product.price = parseFloat(val('prod_price'));
+  if (val('prod_currency')) product.currency = val('prod_currency');
+  if (val('prod_sku')) product.sku = val('prod_sku');
+  if (val('prod_brand')) product.brand = val('prod_brand');
+  if (val('prod_inventory')) product.inventory_quantity = parseInt(val('prod_inventory'));
+  if (val('prod_status')) product.status = val('prod_status');
+  if (val('prod_url')) product.url = val('prod_url');
+
+  const payload = { product };
+  // Use Yotpo Product ID in the URL (not external_id)
+  const url = `${API_BASE}/stores/${storeId}/products/${extId}`;
+  const curlUrl = `https://api.yotpo.com/core/v3/stores/${storeId}/products/${extId}`;
+
+  document.getElementById('prod_curl_pre').textContent =
+`curl -X PATCH "${curlUrl}" \\
+  -H "Content-Type: application/json" \\
+  -H "X-Yotpo-Token: ${token}" \\
+  -d '${JSON.stringify(payload)}'`;
+
+  try {
+    const res = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Yotpo-Token': token
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    document.getElementById('prod_response_pre').innerHTML = syntaxHighlight(JSON.stringify(data, null, 2));
+
+    if (res.ok) {
+      setStatus('prod_status', 'success', '✔ Product updated successfully!');
+    } else {
+      setStatus('prod_status', 'error', `✖ ${res.status} ${res.statusText}`);
+    }
+  } catch (err) {
+    document.getElementById('prod_response_pre').textContent = `Error: ${err.message}`;
+    setStatus('prod_status', 'error', '✖ Network error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '✏️ Update Product';
+}
+
+/* ══════════════════════════════════════════
+   PRODUCTS - RETRIEVE
+══════════════════════════════════════════ */
+async function retrieveProducts(pageInfo = null) {
+  const storeId = val('prod_store_id');
+  const token = val('prod_token');
+
+  if (!storeId || !token) {
+    setStatus('prod_retrieve_status', 'error', '✖ Store ID and Token required');
+    return;
+  }
+
+  setStatus('prod_retrieve_status', 'loading', '⏳ Fetching products...');
+
+  const retrieveId = val('prod_retrieve_id');
+  let url;
+
+  if (retrieveId) {
+    url = `${API_BASE}/stores/${storeId}/products/${retrieveId}`;
+  } else {
+    const params = new URLSearchParams();
+    const limit = val('prod_limit') || '25';
+    params.set('limit', limit);
+    if (pageInfo) params.set('page_info', pageInfo);
+    url = `${API_BASE}/stores/${storeId}/products?${params}`;
+  }
+
+  try {
+    const res = await fetch(url, {
+      headers: { 'X-Yotpo-Token': token }
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      const products = retrieveId ? [data.product] : (data.products || []);
+      productsData = products;
+      renderProducts(products);
+
+      if (!retrieveId) {
+        const nextCursor = data.pagination?.next_page_info || null;
+        if (pageInfo === null) { prodPageStack = [null]; prodCurrentIdx = 0; }
+        if (nextCursor && prodPageStack[prodCurrentIdx + 1] !== nextCursor) {
+          prodPageStack = prodPageStack.slice(0, prodCurrentIdx + 1);
+          prodPageStack.push(nextCursor);
+        }
+
+        const hasPrev = prodCurrentIdx > 0;
+        const hasNext = !!nextCursor;
+        document.getElementById('prod_pagination').style.display = (hasPrev || hasNext) ? 'flex' : 'none';
+        document.getElementById('prod_prev_btn').disabled = !hasPrev;
+        document.getElementById('prod_next_btn').disabled = !hasNext;
+        document.getElementById('prod_page_info').textContent = `Page ${prodCurrentIdx + 1} · ${products.length} products`;
+      }
+
+      setStatus('prod_retrieve_status', 'success', `✔ ${products.length} product(s) retrieved`);
+    } else {
+      setStatus('prod_retrieve_status', 'error', `✖ ${res.status} ${res.statusText}`);
+      document.getElementById('prod_results').innerHTML = '<div class="empty">Error fetching products. See console for details.</div>';
+    }
+  } catch (err) {
+    setStatus('prod_retrieve_status', 'error', '✖ Network error');
+    document.getElementById('prod_results').innerHTML = '<div class="empty">Network error. Try using cURL instead.</div>';
+  }
+}
+
+function renderProducts(products) {
+  const container = document.getElementById('prod_results');
+  const singleView = document.getElementById('prod_single_view');
+
+  if (!products.length) {
+    container.innerHTML = '<div class="empty">No products found.</div>';
+    singleView.style.display = 'none';
+    return;
+  }
+
+  // If single product, show detailed view
+  if (products.length === 1) {
+    const p = products[0];
+    singleView.style.display = 'block';
+    container.style.display = 'none';
+
+    singleView.innerHTML = `
+      <div class="prod-detail">
+        <div class="prod-detail-header">
+          <div class="prod-detail-name">${p.name || 'Product'}</div>
+          ${p.status ? `<span class="badge badge-${p.status === 'active' ? 'success' : 'default'}">${p.status}</span>` : ''}
+        </div>
+        <div class="prod-detail-body">
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">External Product ID</span>
+            <span class="prod-detail-value">${p.external_id || '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Yotpo Product ID</span>
+            <span class="prod-detail-value">${p.yotpo_id || '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Product Name</span>
+            <span class="prod-detail-value">${p.name || '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Product Description</span>
+            <span class="prod-detail-value">${p.description || '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Product URL</span>
+            <span class="prod-detail-value">${p.url ? `<a href="${p.url}" target="_blank">${p.url}</a>` : '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Product Image URL</span>
+            <span class="prod-detail-value">${p.image_url ? `<a href="${p.image_url}" target="_blank">${p.image_url}</a>` : '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Product Price</span>
+            <span class="prod-detail-value">${p.price || '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Currency</span>
+            <span class="prod-detail-value">${p.currency || '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Spec UPC</span>
+            <span class="prod-detail-value">${p.gtins?.find(g => g.declared_type === 'UPC')?.value || '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Spec SKU</span>
+            <span class="prod-detail-value">${p.sku || '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Spec Brand</span>
+            <span class="prod-detail-value">${p.brand || '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Spec MPN</span>
+            <span class="prod-detail-value">${p.mpn || '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Spec ISBN</span>
+            <span class="prod-detail-value">${p.gtins?.find(g => g.declared_type === 'ISBN')?.value || '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Spec EAN</span>
+            <span class="prod-detail-value">${p.gtins?.find(g => g.declared_type === 'EAN')?.value || '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Product Tags</span>
+            <span class="prod-detail-value">${p.tags?.join(', ') || '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Blacklisted</span>
+            <span class="prod-detail-value">${p.custom_properties?.is_blocklisted ? 'Yes' : 'No'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Product Group</span>
+            <span class="prod-detail-value">${p.group_name || '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Inventory Quantity</span>
+            <span class="prod-detail-value">${p.inventory_quantity !== undefined ? p.inventory_quantity : '—'}</span>
+          </div>
+          <div class="prod-detail-row">
+            <span class="prod-detail-label">Is Discontinued</span>
+            <span class="prod-detail-value">${p.is_discontinued ? 'Yes' : 'No'}</span>
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // Otherwise, show table view
+  singleView.style.display = 'none';
+  container.style.display = 'block';
+
+  container.innerHTML = `
+    <table class="prod-table">
+      <thead>
+        <tr>
+          <th>External Product ID</th>
+          <th>Yotpo ID</th>
+          <th>Product Name</th>
+          <th>Product Description</th>
+          <th>Product URL</th>
+          <th>Product Image URL</th>
+          <th>Product Price</th>
+          <th>Currency</th>
+          <th>Spec SKU</th>
+          <th>Spec Brand</th>
+          <th>Spec MPN</th>
+          <th>Product Group</th>
+          <th>Blacklisted</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${products.map(p => `
+          <tr>
+            <td>${p.external_id || '—'}</td>
+            <td>${p.yotpo_id || '—'}</td>
+            <td>${p.name || '—'}</td>
+            <td>${p.description ? p.description.substring(0, 50) + '...' : '—'}</td>
+            <td><a href="${p.url}" target="_blank" style="color:var(--accent);text-decoration:none">${p.url ? 'View' : '—'}</a></td>
+            <td><a href="${p.image_url}" target="_blank" style="color:var(--accent);text-decoration:none">${p.image_url ? 'View' : '—'}</a></td>
+            <td>${p.price || '—'}</td>
+            <td>${p.currency || '—'}</td>
+            <td>${p.sku || '—'}</td>
+            <td>${p.brand || '—'}</td>
+            <td>${p.mpn || '—'}</td>
+            <td>${p.group_name || '—'}</td>
+            <td>${p.custom_properties?.is_blocklisted ? 'Yes' : 'No'}</td>
+            <td>${p.status || '—'}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function prodNextPage() {
+  prodCurrentIdx++;
+  retrieveProducts(prodPageStack[prodCurrentIdx]);
+}
+
+function prodPrevPage() {
+  prodCurrentIdx--;
+  retrieveProducts(prodPageStack[prodCurrentIdx]);
+}
+
+function exportProducts() {
+  if (!productsData.length) {
+    alert('No products to export. Retrieve products first.');
+    return;
+  }
+
+  const headers = ['External ID', 'Yotpo ID', 'Name', 'Description', 'URL', 'Image URL', 'Price', 'Currency', 'UPC', 'SKU', 'Brand', 'MPN', 'ISBN', 'EAN', 'Tags', 'Blacklisted', 'Group'];
+  const rows = productsData.map(p => [
+    p.external_id || '',
+    p.yotpo_id || '',
+    p.name || '',
+    p.description || '',
+    p.url || '',
+    p.image_url || '',
+    p.price || '',
+    p.currency || '',
+    p.gtins?.find(g => g.declared_type === 'UPC')?.value || '',
+    p.sku || '',
+    p.brand || '',
+    p.mpn || '',
+    p.gtins?.find(g => g.declared_type === 'ISBN')?.value || '',
+    p.gtins?.find(g => g.declared_type === 'EAN')?.value || '',
+    p.tags?.join('; ') || '',
+    p.custom_properties?.is_blocklisted ? 'Yes' : 'No',
+    p.group_name || ''
+  ]);
+
+  const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `products-${Date.now()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ══════════════════════════════════════════
+   PRODUCTS - RETRIEVE SINGLE
+══════════════════════════════════════════ */
+async function retrieveSingleProduct() {
+  const storeId = val('prod_store_id');
+  const token = val('prod_token');
+  const extId = val('prod_retrieve_id');
+  const yotpoId = val('prod_retrieve_yotpo_id');
+
+  if (!storeId || !token) {
+    setStatus('prod_retrieve_status', 'error', '✖ Store ID and Token required');
+    return;
+  }
+
+  if (!extId && !yotpoId) {
+    setStatus('prod_retrieve_status', 'error', '✖ Enter either External ID or Yotpo ID');
+    return;
+  }
+
+  setStatus('prod_retrieve_status', 'loading', '⏳ Fetching product...');
+
+  const productId = yotpoId || extId;
+  const url = `${API_BASE}/stores/${storeId}/products/${productId}`;
+
+  try {
+    const res = await fetch(url, {
+      headers: { 'X-Yotpo-Token': token }
+    });
+    const data = await res.json();
+
+    if (res.ok && data.product) {
+      productsData = [data.product];
+      renderProducts([data.product]);
+      document.getElementById('prod_pagination').style.display = 'none';
+      setStatus('prod_retrieve_status', 'success', '✔ Product retrieved successfully');
+    } else {
+      setStatus('prod_retrieve_status', 'error', `✖ ${res.status} ${res.statusText}`);
+      document.getElementById('prod_results').innerHTML = '<div class="empty">Product not found.</div>';
+      document.getElementById('prod_single_view').style.display = 'none';
+    }
+  } catch (err) {
+    setStatus('prod_retrieve_status', 'error', '✖ Network error');
+    document.getElementById('prod_results').innerHTML = '<div class="empty">Network error.</div>';
+    document.getElementById('prod_single_view').style.display = 'none';
+  }
+}
+
+/* ══════════════════════════════════════════
+   ORDERS - CREATE
+══════════════════════════════════════════ */
+document.getElementById('orderForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const storeId = val('order_store_id');
+  const token = val('order_token');
+
+  if (!storeId || !token) {
+    setStatus('order_status', 'error', '✖ Store ID and Token required');
+    return;
+  }
+
+  const btn = document.getElementById('orderCreateBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Creating...';
+  setStatus('order_status', 'loading', '⏳ Creating order...');
+
+  const order = {
+    external_id: val('order_ext_id'),
+    order_date: isoDate(val('order_date')) || new Date().toISOString(),
+    customer: {
+      external_id: val('order_cust_id'),
+      email: val('order_email'),
+      first_name: val('order_first'),
+      last_name: val('order_last')
+    },
+    line_items: [{ quantity: 1 }]
+  };
+
+  if (val('order_currency')) order.currency = val('order_currency');
+  if (val('order_price')) order.total_price = parseFloat(val('order_price'));
+
+  const payload = { order };
+  const url = `${API_BASE}/stores/${storeId}/orders`;
+  const curlUrl = `https://api.yotpo.com/core/v3/stores/${storeId}/orders`;
+
+  document.getElementById('order_curl_pre').textContent =
+`curl -X POST "${url}" \\
+  -H "Content-Type: application/json" \\
+  -H "X-Yotpo-Token: ${token}" \\
+  -d '${JSON.stringify(payload)}'`;
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Yotpo-Token': token
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    document.getElementById('order_response_pre').innerHTML = syntaxHighlight(JSON.stringify(data, null, 2));
+
+    if (res.ok) {
+      setStatus('order_status', 'success', `✔ Order created! ID: ${data.order?.yotpo_id || '—'}`);
+    } else {
+      setStatus('order_status', 'error', `✖ ${res.status} ${res.statusText}`);
+    }
+  } catch (err) {
+    document.getElementById('order_response_pre').textContent = `Error: ${err.message}\n\nNote: CORS may block browser requests. Use the cURL command instead.`;
+    setStatus('order_status', 'error', '✖ Network error — use cURL instead');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🚀 Create Order';
+});
+
+/* ══════════════════════════════════════════
+   ORDERS - BULK QUEUE
+══════════════════════════════════════════ */
+function addOrderToQueue() {
+  const form = document.getElementById('orderForm');
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+
+  const orderData = {
+    external_id: val('order_ext_id'),
+    order_date: val('order_date'),
+    currency: val('order_currency'),
+    total_price: val('order_price'),
+    customer: {
+      external_id: val('order_cust_id'),
+      email: val('order_email'),
+      first_name: val('order_first'),
+      last_name: val('order_last')
+    }
+  };
+
+  orderQueue.push(orderData);
+  renderOrderQueue();
+
+  // Clear form
+  document.getElementById('order_ext_id').value = '';
+  document.getElementById('order_price').value = '';
+  document.getElementById('order_cust_id').value = '';
+  document.getElementById('order_email').value = '';
+  document.getElementById('order_first').value = '';
+  document.getElementById('order_last').value = '';
+
+  setStatus('order_status', 'success', `✔ Order added to queue (${orderQueue.length} total)`);
+}
+
+function renderOrderQueue() {
+  const queueSection = document.getElementById('order_queue_section');
+  const queueContainer = document.getElementById('order_queue');
+
+  if (orderQueue.length === 0) {
+    queueSection.style.display = 'none';
+    return;
+  }
+
+  queueSection.style.display = 'block';
+  document.getElementById('queue_count').textContent = orderQueue.length;
+  document.getElementById('queue_count2').textContent = orderQueue.length;
+
+  queueContainer.innerHTML = orderQueue.map((order, index) => `
+    <div class="queue-item">
+      <div class="queue-item-details">
+        <div class="queue-item-id">${order.external_id}</div>
+        <div class="queue-item-meta">
+          ${order.customer.first_name} ${order.customer.last_name} · ${order.customer.email}
+          ${order.total_price ? ` · ${order.currency || ''} ${order.total_price}` : ''}
+        </div>
+      </div>
+      <button class="queue-item-remove" onclick="removeFromQueue(${index})">✕ Remove</button>
+    </div>
+  `).join('');
+}
+
+function removeFromQueue(index) {
+  orderQueue.splice(index, 1);
+  renderOrderQueue();
+  setStatus('order_status', '', `Order removed. ${orderQueue.length} remaining in queue.`);
+}
+
+async function submitAllOrders() {
+  const storeId = val('order_store_id');
+  const token = val('order_token');
+
+  if (!storeId || !token) {
+    setStatus('order_status', 'error', '✖ Store ID and Token required');
+    return;
+  }
+
+  if (orderQueue.length === 0) {
+    setStatus('order_status', 'error', '✖ No orders in queue');
+    return;
+  }
+
+  const btn = document.getElementById('submitAllBtn');
+  btn.disabled = true;
+  btn.textContent = `⏳ Creating ${orderQueue.length} orders...`;
+  setStatus('order_status', 'loading', `⏳ Creating ${orderQueue.length} orders...`);
+
+  const results = [];
+  let successCount = 0;
+  let failCount = 0;
+
+  for (let i = 0; i < orderQueue.length; i++) {
+    const orderData = orderQueue[i];
+    const order = {
+      external_id: orderData.external_id,
+      order_date: isoDate(orderData.order_date) || new Date().toISOString(),
+      customer: orderData.customer,
+      line_items: [{ quantity: 1 }]
+    };
+
+    if (orderData.currency) order.currency = orderData.currency;
+    if (orderData.total_price) order.total_price = parseFloat(orderData.total_price);
+
+    const payload = { order };
+    const url = `https://api.yotpo.com/core/v3/stores/${storeId}/orders`;
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Yotpo-Token': token
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        successCount++;
+        results.push({ success: true, orderId: orderData.external_id, yotpoId: data.order?.yotpo_id });
+      } else {
+        failCount++;
+        results.push({ success: false, orderId: orderData.external_id, error: `${res.status} ${res.statusText}` });
+      }
+    } catch (err) {
+      failCount++;
+      results.push({ success: false, orderId: orderData.external_id, error: err.message });
+    }
+
+    // Update progress
+    btn.textContent = `⏳ ${i + 1}/${orderQueue.length} completed...`;
+  }
+
+  // Display results
+  const summary = `✔ Created ${successCount} orders${failCount > 0 ? `, ${failCount} failed` : ''}`;
+  setStatus('order_status', successCount > 0 ? 'success' : 'error', summary);
+
+  const responseText = results.map(r =>
+    r.success
+      ? `✓ ${r.orderId} → Yotpo ID: ${r.yotpoId}`
+      : `✗ ${r.orderId} → ${r.error}`
+  ).join('\n');
+
+  document.getElementById('order_response_pre').textContent = responseText;
+
+  // Clear queue
+  orderQueue = [];
+  renderOrderQueue();
+
+  btn.disabled = false;
+  btn.textContent = '🚀 Create All Orders (0)';
+}
+
+/* ══════════════════════════════════════════
+   ORDERS - RETRIEVE
+══════════════════════════════════════════ */
+async function retrieveOrders(pageInfo = null) {
+  const storeId = val('order_store_id');
+  const token = val('order_token');
+
+  if (!storeId || !token) {
+    setStatus('order_retrieve_status', 'error', '✖ Store ID and Token required');
+    return;
+  }
+
+  setStatus('order_retrieve_status', 'loading', '⏳ Fetching orders...');
+
+  const retrieveId = val('order_retrieve_id');
+  let url;
+
+  if (retrieveId) {
+    url = `${API_BASE}/stores/${storeId}/orders/${retrieveId}`;
+  } else {
+    const params = new URLSearchParams();
+    const limit = val('order_limit') || '25';
+    params.set('limit', limit);
+    if (pageInfo) params.set('page_info', pageInfo);
+    url = `${API_BASE}/stores/${storeId}/orders?${params}`;
+  }
+
+  try {
+    const res = await fetch(url, {
+      headers: { 'X-Yotpo-Token': token }
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      const orders = retrieveId ? [data.order] : (data.orders || []);
+      ordersData = orders;
+      renderOrders(orders);
+
+      if (!retrieveId) {
+        const nextCursor = data.pagination?.next_page_info || null;
+        if (pageInfo === null) { orderPageStack = [null]; orderCurrentIdx = 0; }
+        if (nextCursor && orderPageStack[orderCurrentIdx + 1] !== nextCursor) {
+          orderPageStack = orderPageStack.slice(0, orderCurrentIdx + 1);
+          orderPageStack.push(nextCursor);
+        }
+
+        const hasPrev = orderCurrentIdx > 0;
+        const hasNext = !!nextCursor;
+        document.getElementById('order_pagination').style.display = (hasPrev || hasNext) ? 'flex' : 'none';
+        document.getElementById('order_prev_btn').disabled = !hasPrev;
+        document.getElementById('order_next_btn').disabled = !hasNext;
+        document.getElementById('order_page_info').textContent = `Page ${orderCurrentIdx + 1} · ${orders.length} orders`;
+      }
+
+      setStatus('order_retrieve_status', 'success', `✔ ${orders.length} order(s) retrieved`);
+    } else {
+      setStatus('order_retrieve_status', 'error', `✖ ${res.status} ${res.statusText}`);
+      document.getElementById('order_results').innerHTML = '<div class="empty">Error fetching orders</div>';
+    }
+  } catch (err) {
+    setStatus('order_retrieve_status', 'error', '✖ Network error');
+    document.getElementById('order_results').innerHTML = '<div class="empty">Network error</div>';
+  }
+}
+
+function renderOrders(orders) {
+  const container = document.getElementById('order_results');
+  if (!orders.length) {
+    container.innerHTML = '<div class="empty">No orders found</div>';
+    return;
+  }
+
+  container.innerHTML = orders.map(o => {
+    const status = (o.payment_status || '').toLowerCase();
+    const badgeClass = status === 'paid' ? 'badge-success' : status === 'pending' ? 'badge-warning' : 'badge-default';
+    const date = o.order_date ? new Date(o.order_date).toLocaleDateString() : '—';
+    const price = o.total_price ? `${o.currency || ''} ${o.total_price}` : '—';
+    const customer = o.customer ? `${o.customer.first_name || ''} ${o.customer.last_name || ''}`.trim() : '—';
+
+    return `
+      <div class="result-card">
+        <div class="result-header">
+          <div class="result-id">${o.order_name || o.external_id || o.yotpo_id || '—'}</div>
+          ${status ? `<span class="badge ${badgeClass}">${status}</span>` : ''}
+        </div>
+        <div class="result-meta">
+          <span>📅 ${date}</span>
+          <span>💰 ${price}</span>
+          <span>👤 ${customer}</span>
+          ${o.yotpo_id ? `<span>ID: ${o.yotpo_id}</span>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function orderNextPage() {
+  orderCurrentIdx++;
+  retrieveOrders(orderPageStack[orderCurrentIdx]);
+}
+
+function orderPrevPage() {
+  orderCurrentIdx--;
+  retrieveOrders(orderPageStack[orderCurrentIdx]);
+}
+
+function exportOrders() {
+  if (!ordersData.length) {
+    alert('No orders to export. Retrieve orders first.');
+    return;
+  }
+
+  const headers = ['Order ID', 'External ID', 'Date', 'Customer', 'Email', 'Total', 'Currency', 'Status'];
+  const rows = ordersData.map(o => [
+    o.yotpo_id || '',
+    o.external_id || '',
+    o.order_date || '',
+    o.customer ? `${o.customer.first_name || ''} ${o.customer.last_name || ''}`.trim() : '',
+    o.customer?.email || '',
+    o.total_price || '',
+    o.currency || '',
+    o.payment_status || ''
+  ]);
+
+  const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `orders-${Date.now()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+// Set default datetime to now
+const now = new Date();
+now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+document.getElementById('order_date').value = now.toISOString().slice(0, 16);
+</script>
