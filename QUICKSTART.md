@@ -18,29 +18,29 @@ Open your browser to:
 http://localhost:3000/yotpo-dashboard.html
 ```
 
-That's it! Your dashboard is now running without CORS issues.
+That's it! Your dashboard is now running for troubleshooting and data retrieval.
 
 ---
 
-## ✨ What's Fixed
-
+## ✨ Features
 ✅ **No more network errors** - The proxy server handles all API calls
 ✅ **Token works perfectly** - Generate U-Token directly in the browser
-✅ **All features work** - Products, Orders, Bulk Creation, Export - everything!
-✅ **Beautiful token display** - Token appears in a highlighted box with one-click copy
+✅ **Read-only troubleshooting** - Retrieve products and orders, filter by Product ID
 
 ---
 
-## 🎯 Quick Test
+## 🎯 Quick Test (Troubleshooting)
 
 1. Start server with `npm start`
 2. Open `http://localhost:3000/yotpo-dashboard.html`
 3. Go to **Auth tab**
 4. Enter your Store ID and Secret
 5. Click **"Generate U-Token"**
-6. ✨ See your token appear in a green box!
-7. Click **"Copy Token"** button
-8. Token is now in your clipboard and auto-filled everywhere!
+6. Copy the token
+7. Go to **Orders tab**
+8. Enter Store ID and Token
+9. Search for an order by providing a Product ID in the "Product ID" field.
+10. Click **"Retrieve Orders"**.
 
 ---
 

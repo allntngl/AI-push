@@ -936,8 +936,8 @@ pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 ══════════════════════════════════════════ -->
 <div class="page" id="page-products">
   <div class="hero">
-    <h1 class="hero-title">Product Management</h1>
-    <p class="hero-desc">Create, retrieve, and update products in your Yotpo store</p>
+    <h1 class="hero-title">Product Troubleshooting</h1>
+    <p class="hero-desc">Retrieve and export product data</p>
   </div>
 
   <div class="auth-banner">
@@ -952,145 +952,8 @@ pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
   </div>
 
   <div class="grid">
-    <!-- CREATE/UPDATE PRODUCT -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-icon">✏️</span>
-        <div>
-          <div class="card-title">Create / Update Product</div>
-          <div class="card-desc">Fill in product details</div>
-        </div>
-      </div>
-      <div class="card-body">
-        <form id="prodForm">
-          <div class="section-title">Basic Info</div>
-          <div class="field">
-            <label>External Product ID / Yotpo Product ID <span class="req">required</span></label>
-            <input type="text" id="prod_ext_id" placeholder="For Create: use External ID, For Update: use Yotpo ID" required>
-            <div style="font-size:0.688rem; color:var(--muted); margin-top:0.25rem">
-              💡 <strong>Create:</strong> Use your External Product ID (e.g., PROD-001). <strong>Update:</strong> Use Yotpo Product ID from retrieve.
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Product Name <span class="req">required</span></label>
-            <input type="text" id="prod_name" placeholder="Product Name" required>
-          </div>
-
-          <div class="field">
-            <label>Description <span class="opt">optional</span></label>
-            <textarea id="prod_desc" rows="3" placeholder="Product description"></textarea>
-          </div>
-
-          <div class="field-row">
-            <div class="field">
-              <label>Price <span class="opt">optional</span></label>
-              <input type="number" id="prod_price" placeholder="99.99" step="0.01">
-            </div>
-            <div class="field">
-              <label>Currency <span class="opt">optional</span></label>
-              <select id="prod_currency">
-                <option value="">Select</option>
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
-                <option value="CAD">CAD</option>
-                <option value="AUD">AUD</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="section-title">Additional Details</div>
-          <div class="field-row">
-            <div class="field">
-              <label>SKU <span class="opt">optional</span></label>
-              <input type="text" id="prod_sku" placeholder="SKU-001">
-            </div>
-            <div class="field">
-              <label>Brand <span class="opt">optional</span></label>
-              <input type="text" id="prod_brand" placeholder="Brand Name">
-            </div>
-          </div>
-
-          <div class="field-row">
-            <div class="field">
-              <label>Inventory <span class="opt">optional</span></label>
-              <input type="number" id="prod_inventory" placeholder="100">
-            </div>
-            <div class="field">
-              <label>Status <span class="opt">optional</span></label>
-              <select id="prod_status">
-                <option value="">Select</option>
-                <option value="active">Active</option>
-                <option value="draft">Draft</option>
-                <option value="archived">Archived</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Product URL <span class="opt">optional</span></label>
-            <input type="url" id="prod_url" placeholder="https://example.com/product">
-          </div>
-
-          <div class="btn-group" style="margin-top:1.5rem">
-            <button type="submit" class="btn btn-primary" id="prodCreateBtn" style="flex:1">
-              ➕ Create Product
-            </button>
-            <button type="button" class="btn btn-secondary" id="prodUpdateBtn" style="flex:1" onclick="updateProduct()">
-              ✏️ Update Product
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- PRODUCT OUTPUT -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-icon">📊</span>
-        <div>
-          <div class="card-title">Output</div>
-          <div class="card-desc">API responses and results</div>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="status" id="prod_status">
-          <span class="status-dot"></span>
-          <span>Ready</span>
-        </div>
-
-        <div class="output-tabs">
-          <button class="output-tab active" onclick="switchOutput('prod', 'response')">Response</button>
-          <button class="output-tab" onclick="switchOutput('prod', 'curl')">cURL</button>
-        </div>
-
-        <div class="output-panel active" id="prod_out_response">
-          <div class="code-block">
-            <div class="code-header">
-              API Response
-              <button class="copy-btn" onclick="copyText('prod_response_pre')">Copy</button>
-            </div>
-            <pre id="prod_response_pre" style="color:var(--muted)">// Response will appear here</pre>
-          </div>
-        </div>
-
-        <div class="output-panel" id="prod_out_curl">
-          <div class="code-block">
-            <div class="code-header">
-              cURL Command
-              <button class="copy-btn" onclick="copyText('prod_curl_pre')">Copy</button>
-            </div>
-            <pre id="prod_curl_pre" style="color:var(--muted)">// Fill the form to generate</pre>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- RETRIEVE PRODUCTS -->
-  <div style="margin-top:1.5rem">
-    <div class="card">
+    <!-- RETRIEVE PRODUCTS -->
+    <div class="card" style="grid-column: span 2;">
       <div class="card-header">
         <span class="card-icon">🔍</span>
         <div>
@@ -1159,8 +1022,8 @@ pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 ══════════════════════════════════════════ -->
 <div class="page" id="page-orders">
   <div class="hero">
-    <h1 class="hero-title">Order Management</h1>
-    <p class="hero-desc">Create, retrieve, update, and export orders</p>
+    <h1 class="hero-title">Order Troubleshooting</h1>
+    <p class="hero-desc">Retrieve and export order data</p>
   </div>
 
   <div class="auth-banner">
@@ -1174,173 +1037,51 @@ pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
     </div>
   </div>
 
-  <div class="grid">
-    <!-- CREATE ORDER -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-icon">➕</span>
-        <div>
-          <div class="card-title">Create Order</div>
-          <div class="card-desc">Fill in order details</div>
-        </div>
-      </div>
-      <div class="card-body">
-        <form id="orderForm">
-          <div class="section-title">Order Info</div>
-          <div class="field">
-            <label>External Order ID <span class="req">required</span></label>
-            <input type="text" id="order_ext_id" placeholder="ORDER-001" required>
-          </div>
-
-          <div class="field-row">
-            <div class="field">
-              <label>Order Date <span class="req">required</span></label>
-              <input type="datetime-local" id="order_date" required>
-            </div>
-            <div class="field">
-              <label>Currency <span class="opt">optional</span></label>
-              <select id="order_currency">
-                <option value="">Select</option>
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Total Price <span class="opt">optional</span></label>
-            <input type="number" id="order_price" placeholder="99.99" step="0.01">
-          </div>
-
-          <div class="section-title">Customer</div>
-          <div class="field">
-            <label>Customer ID <span class="req">required</span></label>
-            <input type="text" id="order_cust_id" placeholder="cust_001" required>
-          </div>
-
-          <div class="field">
-            <label>Email <span class="req">required</span></label>
-            <input type="email" id="order_email" placeholder="customer@example.com" required>
-          </div>
-
-          <div class="field-row">
-            <div class="field">
-              <label>First Name <span class="req">required</span></label>
-              <input type="text" id="order_first" placeholder="Jane" required>
-            </div>
-            <div class="field">
-              <label>Last Name <span class="req">required</span></label>
-              <input type="text" id="order_last" placeholder="Doe" required>
-            </div>
-          </div>
-
-          <div class="btn-group" style="margin-top:1rem">
-            <button type="button" class="btn btn-secondary" onclick="addOrderToQueue()" style="flex:1">
-              ➕ Add to Queue
-            </button>
-            <button type="submit" class="btn btn-primary" id="orderCreateBtn" style="flex:1">
-              🚀 Create Single Order
-            </button>
-          </div>
-        </form>
-
-        <div id="order_queue_section" style="margin-top:1.5rem; display:none">
-          <div class="section-title">Order Queue (<span id="queue_count">0</span>)</div>
-          <div id="order_queue" class="results"></div>
-          <button class="btn btn-success" onclick="submitAllOrders()" style="width:100%; margin-top:0.75rem" id="submitAllBtn">
-            🚀 Create All Orders (<span id="queue_count2">0</span>)
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ORDER OUTPUT -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-icon">📊</span>
-        <div>
-          <div class="card-title">Output</div>
-          <div class="card-desc">API responses</div>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="status" id="order_status">
-          <span class="status-dot"></span>
-          <span>Ready</span>
-        </div>
-
-        <div class="output-tabs">
-          <button class="output-tab active" onclick="switchOutput('order', 'response')">Response</button>
-          <button class="output-tab" onclick="switchOutput('order', 'curl')">cURL</button>
-        </div>
-
-        <div class="output-panel active" id="order_out_response">
-          <div class="code-block">
-            <div class="code-header">
-              API Response
-              <button class="copy-btn" onclick="copyText('order_response_pre')">Copy</button>
-            </div>
-            <pre id="order_response_pre" style="color:var(--muted)">// Response will appear here</pre>
-          </div>
-        </div>
-
-        <div class="output-panel" id="order_out_curl">
-          <div class="code-block">
-            <div class="code-header">
-              cURL Command
-              <button class="copy-btn" onclick="copyText('order_curl_pre')">Copy</button>
-            </div>
-            <pre id="order_curl_pre" style="color:var(--muted)">// Fill the form to generate</pre>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- RETRIEVE ORDERS -->
-  <div style="margin-top:1.5rem">
-    <div class="card">
-      <div class="card-header">
-        <span class="card-icon">🔍</span>
-        <div>
-          <div class="card-title">Retrieve Orders</div>
-          <div class="card-desc">Search and list orders</div>
+  <div class="card" style="margin-top:1.5rem">
+    <div class="card-header">
+      <span class="card-icon">🔍</span>
+      <div>
+        <div class="card-title">Retrieve Orders</div>
+        <div class="card-desc">Search and list orders</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="field-row">
+        <div class="field">
+          <label>Order ID (optional) <span class="opt">leave empty for all</span></label>
+          <input type="text" id="order_retrieve_id" placeholder="ORDER-001">
+        </div>
+        <div class="field">
+          <label>Product ID (optional) <span class="opt">filter by product</span></label>
+          <input type="text" id="order_retrieve_prod_id" placeholder="e.g. PROD-001">
+        </div>
+        <div class="field">
+          <label>Limit <span class="opt">optional</span></label>
+          <input type="number" id="order_limit" placeholder="25" value="25" min="1" max="100">
         </div>
       </div>
-      <div class="card-body">
-        <div class="field-row">
-          <div class="field">
-            <label>Order ID (optional) <span class="opt">leave empty for all</span></label>
-            <input type="text" id="order_retrieve_id" placeholder="ORDER-001">
-          </div>
-          <div class="field">
-            <label>Limit <span class="opt">optional</span></label>
-            <input type="number" id="order_limit" placeholder="25" value="25" min="1" max="100">
-          </div>
-        </div>
 
-        <div class="btn-group">
-          <button class="btn btn-success" onclick="retrieveOrders()" style="flex:1">
-            🔍 Retrieve Orders
-          </button>
-          <button class="btn btn-export" onclick="exportOrders()" style="flex:1">
-            📥 Export to CSV
-          </button>
-        </div>
+      <div class="btn-group">
+        <button class="btn btn-success" onclick="retrieveOrders()" style="flex:1">
+          🔍 Retrieve Orders
+        </button>
+        <button class="btn btn-export" onclick="exportOrders()" style="flex:1">
+          📥 Export to CSV
+        </button>
+      </div>
 
-        <div class="status" id="order_retrieve_status" style="margin-top:1rem">
-          <span class="status-dot"></span>
-          <span>Ready to fetch</span>
-        </div>
+      <div class="status" id="order_retrieve_status" style="margin-top:1rem">
+        <span class="status-dot"></span>
+        <span>Ready to fetch</span>
+      </div>
 
-        <div id="order_results" class="results" style="margin-top:1rem"></div>
+      <div id="order_results" class="results" style="margin-top:1rem"></div>
 
-        <div class="pagination" id="order_pagination" style="display:none">
-          <button class="pg-btn" onclick="orderPrevPage()" id="order_prev_btn" disabled>← Prev</button>
-          <button class="pg-btn" onclick="orderNextPage()" id="order_next_btn">Next →</button>
-          <span class="pg-info" id="order_page_info"></span>
-        </div>
+      <div class="pagination" id="order_pagination" style="display:none">
+        <button class="pg-btn" onclick="orderPrevPage()" id="order_prev_btn" disabled>← Prev</button>
+        <button class="pg-btn" onclick="orderNextPage()" id="order_next_btn">Next →</button>
+        <span class="pg-info" id="order_page_info"></span>
       </div>
     </div>
   </div>
@@ -1971,230 +1712,6 @@ async function retrieveSingleProduct() {
   }
 }
 
-/* ══════════════════════════════════════════
-   ORDERS - CREATE
-══════════════════════════════════════════ */
-document.getElementById('orderForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const storeId = val('order_store_id');
-  const token = val('order_token');
-
-  if (!storeId || !token) {
-    setStatus('order_status', 'error', '✖ Store ID and Token required');
-    return;
-  }
-
-  const btn = document.getElementById('orderCreateBtn');
-  btn.disabled = true;
-  btn.textContent = '⏳ Creating...';
-  setStatus('order_status', 'loading', '⏳ Creating order...');
-
-  const order = {
-    external_id: val('order_ext_id'),
-    order_date: isoDate(val('order_date')) || new Date().toISOString(),
-    customer: {
-      external_id: val('order_cust_id'),
-      email: val('order_email'),
-      first_name: val('order_first'),
-      last_name: val('order_last')
-    },
-    line_items: [{ quantity: 1 }]
-  };
-
-  if (val('order_currency')) order.currency = val('order_currency');
-  if (val('order_price')) order.total_price = parseFloat(val('order_price'));
-
-  const payload = { order };
-  const url = `${API_BASE}/stores/${storeId}/orders`;
-  const curlUrl = `https://api.yotpo.com/core/v3/stores/${storeId}/orders`;
-
-  document.getElementById('order_curl_pre').textContent =
-`curl -X POST "${url}" \\
-  -H "Content-Type: application/json" \\
-  -H "X-Yotpo-Token: ${token}" \\
-  -d '${JSON.stringify(payload)}'`;
-
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Yotpo-Token': token
-      },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-
-    document.getElementById('order_response_pre').innerHTML = syntaxHighlight(JSON.stringify(data, null, 2));
-
-    if (res.ok) {
-      setStatus('order_status', 'success', `✔ Order created! ID: ${data.order?.yotpo_id || '—'}`);
-    } else {
-      setStatus('order_status', 'error', `✖ ${res.status} ${res.statusText}`);
-    }
-  } catch (err) {
-    document.getElementById('order_response_pre').textContent = `Error: ${err.message}\n\nNote: CORS may block browser requests. Use the cURL command instead.`;
-    setStatus('order_status', 'error', '✖ Network error — use cURL instead');
-  }
-
-  btn.disabled = false;
-  btn.textContent = '🚀 Create Order';
-});
-
-/* ══════════════════════════════════════════
-   ORDERS - BULK QUEUE
-══════════════════════════════════════════ */
-function addOrderToQueue() {
-  const form = document.getElementById('orderForm');
-  if (!form.checkValidity()) {
-    form.reportValidity();
-    return;
-  }
-
-  const orderData = {
-    external_id: val('order_ext_id'),
-    order_date: val('order_date'),
-    currency: val('order_currency'),
-    total_price: val('order_price'),
-    customer: {
-      external_id: val('order_cust_id'),
-      email: val('order_email'),
-      first_name: val('order_first'),
-      last_name: val('order_last')
-    }
-  };
-
-  orderQueue.push(orderData);
-  renderOrderQueue();
-
-  // Clear form
-  document.getElementById('order_ext_id').value = '';
-  document.getElementById('order_price').value = '';
-  document.getElementById('order_cust_id').value = '';
-  document.getElementById('order_email').value = '';
-  document.getElementById('order_first').value = '';
-  document.getElementById('order_last').value = '';
-
-  setStatus('order_status', 'success', `✔ Order added to queue (${orderQueue.length} total)`);
-}
-
-function renderOrderQueue() {
-  const queueSection = document.getElementById('order_queue_section');
-  const queueContainer = document.getElementById('order_queue');
-
-  if (orderQueue.length === 0) {
-    queueSection.style.display = 'none';
-    return;
-  }
-
-  queueSection.style.display = 'block';
-  document.getElementById('queue_count').textContent = orderQueue.length;
-  document.getElementById('queue_count2').textContent = orderQueue.length;
-
-  queueContainer.innerHTML = orderQueue.map((order, index) => `
-    <div class="queue-item">
-      <div class="queue-item-details">
-        <div class="queue-item-id">${order.external_id}</div>
-        <div class="queue-item-meta">
-          ${order.customer.first_name} ${order.customer.last_name} · ${order.customer.email}
-          ${order.total_price ? ` · ${order.currency || ''} ${order.total_price}` : ''}
-        </div>
-      </div>
-      <button class="queue-item-remove" onclick="removeFromQueue(${index})">✕ Remove</button>
-    </div>
-  `).join('');
-}
-
-function removeFromQueue(index) {
-  orderQueue.splice(index, 1);
-  renderOrderQueue();
-  setStatus('order_status', '', `Order removed. ${orderQueue.length} remaining in queue.`);
-}
-
-async function submitAllOrders() {
-  const storeId = val('order_store_id');
-  const token = val('order_token');
-
-  if (!storeId || !token) {
-    setStatus('order_status', 'error', '✖ Store ID and Token required');
-    return;
-  }
-
-  if (orderQueue.length === 0) {
-    setStatus('order_status', 'error', '✖ No orders in queue');
-    return;
-  }
-
-  const btn = document.getElementById('submitAllBtn');
-  btn.disabled = true;
-  btn.textContent = `⏳ Creating ${orderQueue.length} orders...`;
-  setStatus('order_status', 'loading', `⏳ Creating ${orderQueue.length} orders...`);
-
-  const results = [];
-  let successCount = 0;
-  let failCount = 0;
-
-  for (let i = 0; i < orderQueue.length; i++) {
-    const orderData = orderQueue[i];
-    const order = {
-      external_id: orderData.external_id,
-      order_date: isoDate(orderData.order_date) || new Date().toISOString(),
-      customer: orderData.customer,
-      line_items: [{ quantity: 1 }]
-    };
-
-    if (orderData.currency) order.currency = orderData.currency;
-    if (orderData.total_price) order.total_price = parseFloat(orderData.total_price);
-
-    const payload = { order };
-    const url = `https://api.yotpo.com/core/v3/stores/${storeId}/orders`;
-
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Yotpo-Token': token
-        },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        successCount++;
-        results.push({ success: true, orderId: orderData.external_id, yotpoId: data.order?.yotpo_id });
-      } else {
-        failCount++;
-        results.push({ success: false, orderId: orderData.external_id, error: `${res.status} ${res.statusText}` });
-      }
-    } catch (err) {
-      failCount++;
-      results.push({ success: false, orderId: orderData.external_id, error: err.message });
-    }
-
-    // Update progress
-    btn.textContent = `⏳ ${i + 1}/${orderQueue.length} completed...`;
-  }
-
-  // Display results
-  const summary = `✔ Created ${successCount} orders${failCount > 0 ? `, ${failCount} failed` : ''}`;
-  setStatus('order_status', successCount > 0 ? 'success' : 'error', summary);
-
-  const responseText = results.map(r =>
-    r.success
-      ? `✓ ${r.orderId} → Yotpo ID: ${r.yotpoId}`
-      : `✗ ${r.orderId} → ${r.error}`
-  ).join('\n');
-
-  document.getElementById('order_response_pre').textContent = responseText;
-
-  // Clear queue
-  orderQueue = [];
-  renderOrderQueue();
-
-  btn.disabled = false;
-  btn.textContent = '🚀 Create All Orders (0)';
-}
 
 /* ══════════════════════════════════════════
    ORDERS - RETRIEVE
@@ -2211,6 +1728,7 @@ async function retrieveOrders(pageInfo = null) {
   setStatus('order_retrieve_status', 'loading', '⏳ Fetching orders...');
 
   const retrieveId = val('order_retrieve_id');
+  const prodId = val('order_retrieve_prod_id');
   let url;
 
   if (retrieveId) {
@@ -2230,7 +1748,13 @@ async function retrieveOrders(pageInfo = null) {
     const data = await res.json();
 
     if (res.ok) {
-      const orders = retrieveId ? [data.order] : (data.orders || []);
+      let orders = retrieveId ? [data.order] : (data.orders || []);
+
+      // Client-side filtering by product ID
+      if (prodId) {
+        orders = orders.filter(o => o.line_items && o.line_items.some(li => li.product_id === prodId));
+      }
+
       ordersData = orders;
       renderOrders(orders);
 
